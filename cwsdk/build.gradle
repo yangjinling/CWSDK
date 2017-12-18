@@ -1,0 +1,51 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 25
+    buildToolsVersion "26.0.0"
+
+    defaultConfig {
+        minSdkVersion 17
+        targetSdkVersion 21
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    lintOptions { abortOnError false }
+
+}
+//task makeJar(type: Copy) {
+//    //删除存在的
+//    delete 'build/libs/CWSDK.jar'
+//    //设置拷贝的文件
+//    from('build/intermediates/bundles/release/')
+//    //打进jar包后的文件目录
+//    into('build/libs/')
+//    //将classes.jar放入build/libs/目录下
+//    //include ,exclude参数来设置过滤
+//    //（我们只关心classes.jar这个文件）
+//    include('classes.jar')
+//    //重命名
+//    rename('classes.jar', 'CWSDK.jar')
+//}
+//makeJar.dependsOn(build)
+task makeJar(type: proguard.gradle.ProGuardTask, dependsOn: "build") {
+    delete 'build/outputs/jar/CWSDK.jar'//删除之前编译混淆jar包
+    injars 'build/intermediates/bundles/debug/classes.jar'//项目编译但未混淆的jar
+    outjars 'build/outputs/jar/CWSDK.jar'//混淆后的jar路径
+    configuration 'proguard-rules.pro'// 混淆配置文件
+}
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    testCompile 'junit:junit:4.12'
+    compile 'com.android.support:appcompat-v7:25.3.1'
+}

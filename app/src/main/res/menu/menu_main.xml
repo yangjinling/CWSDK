@@ -1,0 +1,51 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="cwbj.cwbpp2.MainActivity">
+
+
+    <item
+        android:id="@+id/action_scanning"
+        android:orderInCategory="100"
+        android:title="蓝牙扫描设备"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_settings"
+        android:orderInCategory="100"
+        android:title="获取固件版本"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_clcard"
+        android:orderInCategory="100"
+        android:title="读接触卡或非接触卡"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_ID"
+        android:orderInCategory="100"
+        android:title="读身份证"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_Fprinter"
+       android:orderInCategory="100"
+        android:title="指纹数据读取"
+        app:showAsAction="never" />
+
+
+    <item
+        android:id="@+id/action_MagicCard"
+        android:orderInCategory="100"
+        android:title="读取磁条卡"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_KeyPad"
+        android:orderInCategory="100"
+        android:title="键盘输入PIN"
+        app:showAsAction="never" />
+
+
+</menu>

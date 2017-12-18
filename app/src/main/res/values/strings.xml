@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">Demo演示1.0</string>
+    <string name="action_settings">获取固件版本</string>
+    <string name="action_scanning">扫描蓝牙设备</string>
+    <string name="action_clcard">读接触卡和非接触卡</string>
+    <string name="title_activity_bt__devices_show">BT_DevicesShow</string>
+    <string name="title_activity_work">WorkActivity</string>
+    <string name="title_activity_idmessage">IDMessageActivity</string>
+    <string name="action_ID">读身份证</string>
+    <string name="action_Fprinter">指纹获取</string>
+    <string name="action_MagicCard">读取磁条卡</string>
+    <string name="action_KeyPad">键盘输入pin</string>
+    <string name="title_activity_get_ver">GetVerActivity</string>
+    <string name="title_activity_fprinter">FprinterActivity</string>
+    <string name="title_activity_magic">MagicActivity</string>
+    <string name="title_activity_key_pad">KeyPadActivity</string>
+
+
+</resources>

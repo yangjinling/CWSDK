@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_work2"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="cwbj.cwsdk2.activity.WorkActivity">
+<include layout="@layout/title"></include>
+
+
+    <ImageView
+        android:layout_marginTop="48dp"
+        android:layout_marginLeft="27dp"
+        android:layout_width="100dp"
+        android:layout_height="140dp"
+        app:srcCompat="@mipmap/ic_launcher"
+        android:id="@+id/imageView" />
+
+    <TextView
+        android:text="点击读取身份信息"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="200dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="30dp"
+        android:id="@+id/textView"
+        android:layout_below="@+id/imageView"
+        android:layout_alignParentStart="true" />
+
+    <Button
+        android:text="读取信息"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="45dp"
+        android:layout_marginRight="45dp"
+        android:background="@drawable/button_style"
+        android:textColor="@android:color/white"
+        android:textSize="20sp"
+        android:layout_marginTop="50dp"
+        android:layout_below="@+id/textView"
+        android:id="@+id/button3" />
+
+<include layout="@layout/prograss"></include>
+
+</RelativeLayout>

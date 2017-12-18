@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/content_main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="cwbj.cwsdk2.activity.MainActivity"
+    tools:showIn="@layout/activity_main">
+
+    <Button
+        android:id="@+id/btn_ble"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_gravity="center"
+        android:text="经典蓝牙" />
+    <Button
+        android:id="@+id/btn_wifi"
+        android:layout_alignParentRight="true"
+        android:layout_width="wrap_content"
+        android:layout_gravity="center"
+        android:layout_height="48dp"
+        android:text="wifi" />
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="48dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/sample_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="28dp"
+            android:layout_marginTop="25dp"
+            android:text="状态显示"
+            android:textColor="@android:color/black"
+            android:textSize="20sp" />
+
+
+        <EditText
+            android:id="@+id/msg1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="18dp"
+            android:layout_marginRight="18dp"
+            android:layout_marginTop="15dp"
+            android:background="@drawable/text_style"
+            android:hint="蓝牙名称:"
+            android:inputType="text"
+            android:minHeight="50dp"
+            android:paddingLeft="10dp"></EditText>
+
+
+        <EditText
+            android:id="@+id/msg2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="18dp"
+            android:layout_marginRight="18dp"
+            android:layout_marginTop="15dp"
+            android:background="@drawable/text_style"
+            android:hint="蓝牙地址:"
+            android:inputType="text"
+            android:minHeight="50dp"
+            android:paddingLeft="10dp"
+            android:textSize="18sp">
+
+        </EditText>
+
+        <EditText
+            android:id="@+id/msg3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="18dp"
+            android:layout_marginRight="18dp"
+            android:layout_marginTop="15dp"
+            android:background="@drawable/text_style"
+            android:hint="蓝牙状态:"
+            android:inputType="text"
+            android:minHeight="50dp"
+            android:paddingLeft="10dp"
+            android:textSize="18sp">
+
+        </EditText>
+
+
+    </LinearLayout>
+</RelativeLayout>

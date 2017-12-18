@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/content_magic"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="cwbj.cwsdk2.activity.MagicActivity"
+    tools:showIn="@layout/activity_magic">
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+        <TextView
+            android:layout_marginTop="27dp"
+            android:layout_marginLeft="27dp"
+            android:text="一磁道数据："
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/textView5" />
+
+        <TextView
+            android:text="内容"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="27dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/textView6" />
+
+        <TextView
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="27dp"
+            android:text="二磁道数据:"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/textView7" />
+
+        <TextView
+            android:text="内容"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="27dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/textView8" />
+
+        <TextView
+            android:text="三磁道数据:"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="27dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/textView9" />
+
+
+        <TextView
+            android:text="内容"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="27dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/textView10" />
+
+        <Button
+            android:text="读取刷卡器"
+            android:background="@drawable/button_style"
+            android:textSize="20sp"
+            android:layout_marginLeft="45dp"
+            android:layout_marginRight="45dp"
+            android:textColor="@android:color/white"
+            android:layout_marginTop="20dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/button7" />
+
+        </LinearLayout>
+
+</RelativeLayout>

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:layout_marginTop="5dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/button1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onButtonClicked"
+            android:text="Button" />
+
+        <Button
+            android:id="@+id/button2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="scan" />
+
+
+        <Button
+            android:id="@+id/button3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="获取版本号" />
+
+        <Button
+            android:id="@+id/magnetic"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="刷磁条卡" />
+
+
+    </LinearLayout>
+
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+    <Button
+        android:id="@+id/button4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="unpaire" />
+
+    <Button
+        android:id="@+id/identity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="读取身份证" />
+    <Button
+        android:id="@+id/key_ming"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="明文key"/>
+    <Button
+        android:id="@+id/key_mi"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="密文key"/>
+</LinearLayout>
+I<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+    <Button
+        android:id="@+id/ic_contact"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="接触ic卡"/>
+    <Button
+        android:id="@+id/ic_nocontact"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="非接触ic卡"/>
+</LinearLayout>
+    <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:id="@+id/LinearLayout2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:layout_marginTop="5dp"
+            android:orientation="vertical">
+
+
+            <ListView
+                android:id="@+id/listView1"
+                android:layout_width="wrap_content"
+                android:layout_height="500dp"
+
+                android:layout_marginTop="17dp"></ListView>
+
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+
+                android:text="TextView" />
+
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</LinearLayout>

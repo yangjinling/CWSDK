@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_work2"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="cwbj.cwsdk2.activity.WorkActivity">
+
+    <include layout="@layout/title"></include>
+
+    <include layout="@layout/prograss"></include>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="10dp"
+        android:orientation="vertical">
+
+        <ScrollView
+            android:id="@+id/ScrollViewcn1"
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="48dp"
+            android:layout_weight="1"
+            android:fadingEdge="vertical"
+            android:scrollbars="vertical">
+
+            <TextView
+                android:id="@+id/textViewcn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="27dp"
+                android:layout_marginRight="27dp"
+                android:text="点击读取接触卡或非接触卡卡号......" />
+        </ScrollView>
+
+        <LinearLayout
+            android:layout_marginTop="5dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/button"
+                android:layout_width="match_parent"
+                android:layout_height="33dp"
+                android:layout_marginLeft="45dp"
+                android:layout_marginRight="45dp"
+                android:background="@drawable/button_style"
+                android:text="读取接触卡卡号"
+                android:textColor="@android:color/white"
+                android:textSize="20sp" />
+
+            <Button
+                android:id="@+id/button2"
+                android:layout_width="match_parent"
+                android:layout_height="33dp"
+                android:layout_marginLeft="45dp"
+                android:layout_marginRight="45dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/button_style"
+                android:text="读取非接触卡卡号"
+                android:textColor="@android:color/white"
+                android:textSize="20sp"></Button>
+        </LinearLayout>
+    </LinearLayout>
+
+
+</RelativeLayout>
