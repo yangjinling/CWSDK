@@ -1,6 +1,9 @@
 package cwbj.cwsdk2.activity;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -55,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 PubUtils.isWifi = true;
+                ChangeURL();
             }
         });
         btn_ble.setOnClickListener(new View.OnClickListener() {
@@ -75,6 +79,26 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void ChangeURL() {
+        final EditText editText = new EditText(this);
+        editText.setText(PubUtils.ip);
+        new AlertDialog.Builder(this).setTitle("修改URL").setView(editText)
+                .setNegativeButton("确定", new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String url = editText.getText().toString();
+                        PubUtils.ip = url;
+                    }
+                }).setPositiveButton("取消", new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        }).create().show();
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -91,16 +115,21 @@ public class MainActivity extends AppCompatActivity {
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             /*获取固件版本*/
-            if ("已配对".equals(et3.getText().toString())) {
-                Intent intent = new Intent(MainActivity.this, GetVerActivity.class);
+            if (PubUtils.isWifi) {
+                Intent intent = new Intent(MainActivity.this, WorkActivity.class);
                 intent.putExtra("MAC", SelecetedMACStr);
                 startActivity(intent);
-            } else if (TextUtils.isEmpty(et3.getText().toString())) {
-                Toast.makeText(this, "请去扫描选择蓝牙设备", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, "请去设置中进行蓝牙配对", Toast.LENGTH_SHORT).show();
+                if ("已配对".equals(et3.getText().toString())) {
+                    Intent intent = new Intent(MainActivity.this, GetVerActivity.class);
+                    intent.putExtra("MAC", SelecetedMACStr);
+                    startActivity(intent);
+                } else if (TextUtils.isEmpty(et3.getText().toString())) {
+                    Toast.makeText(this, "请去扫描选择蓝牙设备", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "请去设置中进行蓝牙配对", Toast.LENGTH_SHORT).show();
+                }
             }
-
             return true;
         }
 
@@ -114,63 +143,93 @@ public class MainActivity extends AppCompatActivity {
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_clcard) {
             /*接触卡或非接触卡*/
-            if ("已配对".equals(et3.getText().toString())) {
+            if (PubUtils.isWifi) {
                 Intent intent = new Intent(MainActivity.this, WorkActivity.class);
                 intent.putExtra("MAC", SelecetedMACStr);
                 startActivity(intent);
-            } else if (TextUtils.isEmpty(et3.getText().toString())) {
-                Toast.makeText(this, "请去扫描选择蓝牙设备", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, "请去设置中进行蓝牙配对", Toast.LENGTH_SHORT).show();
+                if ("已配对".equals(et3.getText().toString())) {
+                    Intent intent = new Intent(MainActivity.this, WorkActivity.class);
+                    intent.putExtra("MAC", SelecetedMACStr);
+                    startActivity(intent);
+                } else if (TextUtils.isEmpty(et3.getText().toString())) {
+                    Toast.makeText(this, "请去扫描选择蓝牙设备", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "请去设置中进行蓝牙配对", Toast.LENGTH_SHORT).show();
+                }
+                return true;
             }
-            return true;
         }
         if (id == R.id.action_ID) {
             /*读取身份证*/
-            if ("已配对".equals(et3.getText().toString())) {
+            if (PubUtils.isWifi) {
                 Intent intent = new Intent(MainActivity.this, IDMessageActivity.class);
                 intent.putExtra("MAC", SelecetedMACStr);
                 startActivity(intent);
-            } else if (TextUtils.isEmpty(et3.getText().toString())) {
-                Toast.makeText(this, "请去扫描选择蓝牙设备", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, "请去设置中进行蓝牙配对", Toast.LENGTH_SHORT).show();
+                if ("已配对".equals(et3.getText().toString())) {
+                    Intent intent = new Intent(MainActivity.this, IDMessageActivity.class);
+                    intent.putExtra("MAC", SelecetedMACStr);
+                    startActivity(intent);
+                } else if (TextUtils.isEmpty(et3.getText().toString())) {
+                    Toast.makeText(this, "请去扫描选择蓝牙设备", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "请去设置中进行蓝牙配对", Toast.LENGTH_SHORT).show();
+                }
             }
         }
         if (id == R.id.action_Fprinter) {
             /*指纹数据读取*/
-            if ("已配对".equals(et3.getText().toString())) {
+            if (PubUtils.isWifi) {
                 Intent intent = new Intent(MainActivity.this, FprinterActivity.class);
                 intent.putExtra("MAC", SelecetedMACStr);
                 startActivity(intent);
-            } else if (TextUtils.isEmpty(et3.getText().toString())) {
-                Toast.makeText(this, "请去扫描选择蓝牙设备", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, "请去设置中进行蓝牙配对", Toast.LENGTH_SHORT).show();
+                if ("已配对".equals(et3.getText().toString())) {
+                    Intent intent = new Intent(MainActivity.this, FprinterActivity.class);
+                    intent.putExtra("MAC", SelecetedMACStr);
+                    startActivity(intent);
+                } else if (TextUtils.isEmpty(et3.getText().toString())) {
+                    Toast.makeText(this, "请去扫描选择蓝牙设备", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "请去设置中进行蓝牙配对", Toast.LENGTH_SHORT).show();
+                }
             }
         }
         if (id == R.id.action_MagicCard) {
             /*读取磁条卡*/
-            if ("已配对".equals(et3.getText().toString())) {
+            if (PubUtils.isWifi) {
                 Intent intent = new Intent(MainActivity.this, MagicActivity.class);
                 intent.putExtra("MAC", SelecetedMACStr);
                 startActivity(intent);
-            } else if (TextUtils.isEmpty(et3.getText().toString())) {
-                Toast.makeText(this, "请去扫描选择蓝牙设备", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, "请去设置中进行蓝牙配对", Toast.LENGTH_SHORT).show();
+                if ("已配对".equals(et3.getText().toString())) {
+                    Intent intent = new Intent(MainActivity.this, MagicActivity.class);
+                    intent.putExtra("MAC", SelecetedMACStr);
+                    startActivity(intent);
+                } else if (TextUtils.isEmpty(et3.getText().toString())) {
+                    Toast.makeText(this, "请去扫描选择蓝牙设备", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "请去设置中进行蓝牙配对", Toast.LENGTH_SHORT).show();
+                }
             }
         }
         if (id == R.id.action_KeyPad) {
             /*键盘输入pin*/
-            if ("已配对".equals(et3.getText().toString())) {
+            if (PubUtils.isWifi) {
                 Intent intent = new Intent(MainActivity.this, KeyPadActivity.class);
                 intent.putExtra("MAC", SelecetedMACStr);
                 startActivity(intent);
-            } else if (TextUtils.isEmpty(et3.getText().toString())) {
-                Toast.makeText(this, "请去扫描选择蓝牙设备", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, "请去设置中进行蓝牙配对", Toast.LENGTH_SHORT).show();
+                if ("已配对".equals(et3.getText().toString())) {
+                    Intent intent = new Intent(MainActivity.this, KeyPadActivity.class);
+                    intent.putExtra("MAC", SelecetedMACStr);
+                    startActivity(intent);
+                } else if (TextUtils.isEmpty(et3.getText().toString())) {
+                    Toast.makeText(this, "请去扫描选择蓝牙设备", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "请去设置中进行蓝牙配对", Toast.LENGTH_SHORT).show();
+                }
             }
         }
         return super.onOptionsItemSelected(item);

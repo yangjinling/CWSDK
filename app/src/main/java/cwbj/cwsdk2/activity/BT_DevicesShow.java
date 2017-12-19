@@ -2,6 +2,7 @@ package cwbj.cwsdk2.activity;
 
 import android.Manifest;
 import android.app.Activity;
+import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -20,6 +21,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,6 +44,9 @@ public class BT_DevicesShow extends Activity {
     private ImageView btn_back;
     private TextView tv_title;
     private ProgressBar prograssBar;
+    BluetoothDevice WorkDev = null;
+    private int index;
+    private boolean bond = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,15 +75,25 @@ public class BT_DevicesShow extends Activity {
 
             @Override
             public void onItemClick(AdapterView<?> arg0, View arg1,
-                                    int arg2, long arg3) {
+                                    int arg2, final long arg3) {
                 // TODO Auto-generated method stub
-
                 Intent intent = new Intent();
+                index = (int) arg3;
                 ReStr = (String) lvBTDevices.getItemAtPosition((int) arg3);
-                cwsdk.finalize();
-                intent.putExtra("SelectedDevices", ReStr);
-                setResult(20, intent);
-                finish();
+                String[] BT_Devices = ReStr.split("\\|");
+                WorkDev = cwsdk.GetBlueToothDevicesByMAC(BT_Devices[2]);
+                if (WorkDev.getBondState() == BluetoothDevice.BOND_NONE) {
+                    try {
+                        bond = createBond(WorkDev);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    cwsdk.finalize();
+                    intent.putExtra("SelectedDevices", ReStr);
+                    setResult(20, intent);
+                    finish();
+                }
 
             }
 
@@ -90,6 +105,10 @@ public class BT_DevicesShow extends Activity {
             public void handleMessage(Message msg) {
                 if (msg.what == 0x1) {
                     prograssBar.setVisibility(View.INVISIBLE);
+                    if (bond) {
+                        lstDevices.remove(index);
+                        adtDevices.notifyDataSetChanged();
+                    }
                     Log.e("CWLOG", "接受了---" + msg.obj.toString());
                     Log.e("CWLOG", "listsie===" + lstDevices.size());
                     if (lstDevices.contains(msg.obj.toString())) {
@@ -107,6 +126,13 @@ public class BT_DevicesShow extends Activity {
 
     }
 
+    public boolean createBond(BluetoothDevice btDevice)
+            throws Exception {
+        Class class1 = Class.forName("android.bluetooth.BluetoothDevice");
+        Method createBondMethod = class1.getMethod("createBond");
+        Boolean returnValue = (Boolean) createBondMethod.invoke(btDevice);
+        return returnValue.booleanValue();
+    }
 
     //Activity被覆盖到下面或者锁屏时被调用
     @Override

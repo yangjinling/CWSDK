@@ -69,6 +69,7 @@ public class PubUtils {
     public static String COMMAND_PIN_CIPHERTEXT_1 = "F0000FFB8025140000080000000000000000";
     public static String COMMAND_PIN_CIPHERTEXT_2 = "F5000AFB802314000003010002";
 
+    public static String ip="172.20.10.3";
     // ///////// StringToHex:String转成byte[],再将每个byte转成两个char表示的hex�?
     public static String ByteArrayToHex(byte[] b) {
         String ret = "";

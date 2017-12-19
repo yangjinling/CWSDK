@@ -88,6 +88,9 @@ public class GetVerActivity extends Activity implements View.OnClickListener {
                         //connect服务器失败
                         client.openClientThread();
                         break;
+                    case 2:
+                        Toast.makeText(GetVerActivity.this, "" + msg.obj.toString(), Toast.LENGTH_SHORT).show();
+                        break;
                 }
 
             }
@@ -97,7 +100,7 @@ public class GetVerActivity extends Activity implements View.OnClickListener {
             client = new SocketClient();
             //服务端的IP地址和端口号
 //                    client.clintValue(getApplicationContext(), "192.168.0.48", 9999);
-            client.clintValue(getApplicationContext(), "172.16.39.182", 9999, wifiHandler);
+            client.clintValue(getApplicationContext(), PubUtils.ip, 9999, wifiHandler);
             //开启客户端接收消息线程
             client.openClientThread();
         } else {
@@ -124,12 +127,12 @@ public class GetVerActivity extends Activity implements View.OnClickListener {
                     }
 
                     @Override
-                    public void getDataFail(int code) {
+                    public void getDataFail(final int code) {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 prograssBar.setVisibility(View.INVISIBLE);
-                                tv.setText("数据不完整");
+                                tv.setText("" + code);
                             }
                         });
 

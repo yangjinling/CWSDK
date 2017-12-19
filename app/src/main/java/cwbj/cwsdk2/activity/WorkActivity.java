@@ -85,7 +85,21 @@ public class WorkActivity extends Activity implements View.OnClickListener {
             @Override
             public void handleMessage(Message msg) {
                 prograssBar.setVisibility(View.INVISIBLE);
-                tv.setText("读取卡号为：" + msg.obj.toString());
+                switch (msg.what) {
+                    case 1:
+                        tv.setText("读取卡号为：" + msg.obj.toString());
+                        break;
+                    case 0:
+                        //connect服务器失败
+                        client.openClientThread();
+                        break;
+                    case 2:
+                        Toast.makeText(WorkActivity.this, "" + msg.obj.toString(), Toast.LENGTH_SHORT).show();
+                        break;
+                    case 100:
+                        Toast.makeText(WorkActivity.this, "" + msg.obj.toString(), Toast.LENGTH_SHORT).show();
+                        break;
+                }
             }
         };
         WorkDev = cwsdk.GetBlueToothDevicesByMAC(sMAC);
@@ -95,7 +109,7 @@ public class WorkActivity extends Activity implements View.OnClickListener {
             client = new SocketClient();
             //服务端的IP地址和端口号
 //                    client.clintValue(getApplicationContext(), "192.168.0.48", 9999);
-            client.clintValue(getApplicationContext(), "172.16.39.182", 9999, wifiHandler);
+            client.clintValue(getApplicationContext(), PubUtils.ip, 9999, wifiHandler);
             //开启客户端接收消息线程
             client.openClientThread();
         } else {
@@ -122,10 +136,16 @@ public class WorkActivity extends Activity implements View.OnClickListener {
                     }
 
                     @Override
-                    public void getDataFail(int code) {
+                    public void getDataFail(final int code) {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
+                                if (code == 100) {
+                                    //上电寻卡失败
+                                    Toast.makeText(WorkActivity.this, "上电寻卡失败", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Toast.makeText(WorkActivity.this, "" + code, Toast.LENGTH_SHORT).show();
+                                }
                                 prograssBar.setVisibility(View.INVISIBLE);
                             }
                         });
@@ -279,6 +299,8 @@ public class WorkActivity extends Activity implements View.OnClickListener {
 
                 } else {
                     //updateUIMsg("读取卡失败，是否重新读取？", 5);
+                    Toast.makeText(WorkActivity.this, "读取卡片超时", Toast.LENGTH_SHORT).show();
+                    prograssBar.setVisibility(View.GONE);
                 }
                 break;
             case DataBean.CMD_BLUTOOTH_STATE: {

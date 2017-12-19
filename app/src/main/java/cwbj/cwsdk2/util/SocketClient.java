@@ -151,9 +151,9 @@ public class SocketClient {
                             String result = stringBuilder.toString();
                             String strSW = result.substring(result.length() - 4);
                             int pulSW = Integer.valueOf(strSW, 16);
-                            if (pulSW == 0x9000) {
-                                boolean completion = PubUtils.judgeData(result);
-                                if (completion) {
+                            boolean completion = PubUtils.judgeData(result);
+                            if (completion) {
+                                if (pulSW == 0x9000) {
                                     if (mType == 1) {
                                         //接触卡
                                         index++;
@@ -201,7 +201,7 @@ public class SocketClient {
                                         index++;
                                         if (index == 1) {
                                             sendMsg(BJCWUtil.StrToHex(PubUtils.sendApdu("FB810001000000", 5)));
-                                            dealDate(result);
+                                            dealDate(result, 1);
                                         } else {
                                             stringBuilder = new StringBuilder();
                                             index = 0;
@@ -213,7 +213,7 @@ public class SocketClient {
                                             sendMsg(BJCWUtil.StrToHex(PubUtils.sendApdu("FB802380000003010002", 20)));
                                             stringBuilder = new StringBuilder();
                                         } else {
-                                            dealDate(result);
+                                            dealDate(result, 1);
                                             index = 0;
                                         }
                                     } else if (mType == 7) {
@@ -279,8 +279,11 @@ public class SocketClient {
                                         }
                                     } else {
                                         //其他
-                                        dealDate(result);
+                                        dealDate(result, 1);
                                     }
+                                } else {
+                                    //数据完整错误码
+                                    dealDate("" + pulSW, 2);
                                 }
                             }
                         }
@@ -293,34 +296,6 @@ public class SocketClient {
 
         }
 
-        private void dealDate(String result) {
-            String strReply = result.substring(6, result.length() - 4);// 4
-            Message msg = new Message();
-            msg.what = 1;
-            msg.obj = strReply;
-            mHandler.sendMessage(msg);
-            stringBuilder = new StringBuilder();
-        }
-
-        private void dealDate(String result, int type, int what) {
-            String strReply = result.substring(6, result.length() - 4);// 4
-            Message msg = new Message();
-            msg.what = what;
-            if (type == 1) {
-                String StrVer = strReply.toString();
-                String StringVer = "";
-                for (int i = 1; i < StrVer.length(); i++) {
-                    StringVer += StrVer.charAt(i++);
-                }
-                byte[] Ver = BJCWUtil.StrToHex(StringVer);
-                String sv = new String(Ver);
-                msg.obj = sv;
-            } else {
-                msg.obj = strReply;
-            }
-            mHandler.sendMessage(msg);
-            stringBuilder = new StringBuilder();
-        }
 
         /**
          * 向外发送。
@@ -343,6 +318,40 @@ public class SocketClient {
                 Log.e("YJL", "close() of connect socket failed", e);
             }
         }
+    }
+
+    private void dealDate(String result, int code) {
+        Message msg = new Message();
+        msg.what = code;
+        if (code == 1) {
+            String strReply = result.substring(6, result.length() - 4);// 4
+            msg.obj = strReply;
+        } else {
+            msg.obj = result;
+            stringBuilder = new StringBuilder();
+        }
+        mHandler.sendMessage(msg);
+        stringBuilder = new StringBuilder();
+    }
+
+    private void dealDate(String result, int type, int what) {
+        String strReply = result.substring(6, result.length() - 4);// 4
+        Message msg = new Message();
+        msg.what = what;
+        if (type == 1) {
+            String StrVer = strReply.toString();
+            String StringVer = "";
+            for (int i = 1; i < StrVer.length(); i++) {
+                StringVer += StrVer.charAt(i++);
+            }
+            byte[] Ver = BJCWUtil.StrToHex(StringVer);
+            String sv = new String(Ver);
+            msg.obj = sv;
+        } else {
+            msg.obj = strReply;
+        }
+        mHandler.sendMessage(msg);
+        stringBuilder = new StringBuilder();
     }
 
     public void unregisterHandler() {
@@ -459,11 +468,18 @@ public class SocketClient {
         }
         if (index == 3) {
             String strReply = result.substring(20, result.length() - 4);// 4
-            String resultCardNum = PubUtils.getCardNum(strReply);
-            SWdataBean.SetCardNum(resultCardNum);
-            Log.e("YJL", "卡号" + resultCardNum);
-            sendMsg(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_NOCONTACT_4));
-            stringBuilder = new StringBuilder();
+            if (strReply.length() < 26) {
+                Log.e("YJL", "icReadCard  00B2 error 数据错误");
+                //上电寻卡失败
+                dealDate("寻卡失败", 100);
+                stringBuilder = new StringBuilder();
+            } else {
+                String resultCardNum = PubUtils.getCardNum(strReply);
+                SWdataBean.SetCardNum(resultCardNum);
+                Log.e("YJL", "卡号" + resultCardNum);
+                sendMsg(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_NOCONTACT_4));
+                stringBuilder = new StringBuilder();
+            }
         }
     }
 
@@ -526,11 +542,17 @@ public class SocketClient {
             }
         } else if (index == 5) {
             String strReply = result.substring(20, result.length() - 4);// 4
-            String results = PubUtils.getCardNum(strReply);
-            Log.e("YJL", "卡号" + results);
-            SWdataBean.SetCardNum(results);
-            stringBuilder = new StringBuilder();
-            sendMsg(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_CONTACT_6));
+            if (strReply.length() < 26) {
+                Log.e("YJL", "icReadCard  00B2 error 数据错误");
+                //100上电寻卡失败
+                dealDate("上电寻卡失败", 100);
+            } else {
+                String results = PubUtils.getCardNum(strReply);
+                Log.e("YJL", "卡号" + results);
+                SWdataBean.SetCardNum(results);
+                stringBuilder = new StringBuilder();
+                sendMsg(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_CONTACT_6));
+            }
         }
     }
 

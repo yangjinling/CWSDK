@@ -87,8 +87,19 @@ public class MagicActivity extends Activity implements View.OnClickListener {
             @Override
             public void handleMessage(Message msg) {
                 prograssBar.setVisibility(View.INVISIBLE);
-                String result = dealTrackData(msg.obj.toString());
-                Show3Tracks(result);
+                switch (msg.what) {
+                    case 1:
+                        String result = dealTrackData(msg.obj.toString());
+                        Show3Tracks(result);
+                        break;
+                    case 0:
+                        //connect服务器失败
+                        client.openClientThread();
+                        break;
+                    case 2:
+                        Toast.makeText(MagicActivity.this, "" + msg.obj.toString(), Toast.LENGTH_SHORT).show();
+                        break;
+                }
             }
         };
         WorkDev = cwsdk.GetBlueToothDevicesByMAC(sMAC);
@@ -96,7 +107,7 @@ public class MagicActivity extends Activity implements View.OnClickListener {
             client = new SocketClient();
             //服务端的IP地址和端口号
 //                    client.clintValue(getApplicationContext(), "192.168.0.48", 9999);
-            client.clintValue(getApplicationContext(), "172.16.39.182", 9999, wifiHandler);
+            client.clintValue(getApplicationContext(), PubUtils.ip, 9999, wifiHandler);
             //开启客户端接收消息线程
             client.openClientThread();
         } else {
@@ -110,7 +121,7 @@ public class MagicActivity extends Activity implements View.OnClickListener {
                     }
 
                     @Override
-                    public void dealData(int type,final String data) {
+                    public void dealData(int type, final String data) {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -123,10 +134,11 @@ public class MagicActivity extends Activity implements View.OnClickListener {
                     }
 
                     @Override
-                    public void getDataFail(int code) {
+                    public void getDataFail(final int code) {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
+                                Toast.makeText(MagicActivity.this, "" + code, Toast.LENGTH_SHORT).show();
                                 prograssBar.setVisibility(View.INVISIBLE);
                             }
                         });
@@ -188,7 +200,8 @@ public class MagicActivity extends Activity implements View.OnClickListener {
         if (null != bluetoothGattUtil) {
             bluetoothGattUtil.unregisterCallBack();
             bluetoothGattUtil.disconnect();
-        } if (null != client) {
+        }
+        if (null != client) {
             client.unregisterHandler();
             client.disconnect();
         }

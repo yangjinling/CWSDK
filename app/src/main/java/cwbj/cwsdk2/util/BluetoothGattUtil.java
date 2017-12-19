@@ -355,9 +355,9 @@ public class BluetoothGattUtil extends BluetoothGattCallback {
         String result = builder.toString();
         Log.e("YJL", "builder===" + builder.toString().length());
         int pulSW = Integer.valueOf(builder.toString().substring(builder.toString().length() - 4), 16);
-        if (pulSW == 0x9000) {
-            boolean completion = PubUtils.judgeData(result);
-            if (completion) {
+        boolean completion = PubUtils.judgeData(result);
+        if (completion) {
+            if (pulSW == 0x9000) {
                 if (mType == 1) {
                     //接触
                     index++;
@@ -470,6 +470,9 @@ public class BluetoothGattUtil extends BluetoothGattCallback {
                     //其他情况
                     sendData(completion, result);
                 }
+            } else {
+                mCallBack.getDataFail(pulSW);
+                builder = new StringBuilder();
             }
         }
 
@@ -596,30 +599,41 @@ public class BluetoothGattUtil extends BluetoothGattCallback {
         }
         if (index == 3) {
             String strReply = result.substring(20, result.length() - 4);// 4
-            String resultCardNum = PubUtils.getCardNum(strReply);
-            SWdataBean.SetCardNum(resultCardNum);
-            Log.e("YJL", "卡号" + resultCardNum);
-            writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_NOCONTACT_4));
-            builder = new StringBuilder();
+            if (strReply.length() < 26) {
+                Log.e("YJL", "icReadCard  00B2 error 数据错误");
+                //100上电寻卡失败
+                mCallBack.getDataFail(100);
+                builder = new StringBuilder();
+            } else {
+                String resultCardNum = PubUtils.getCardNum(strReply);
+                SWdataBean.SetCardNum(resultCardNum);
+                Log.e("YJL", "卡号" + resultCardNum);
+                writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_NOCONTACT_4));
+                builder = new StringBuilder();
+            }
         }
     }
 
     private void sendContact(int index, String result) {
         if (index == 2) {
             String strReply = result.substring(26, result.length() - 4);
-            String szSW = strReply.substring(strReply.length() - 4);
-            byte[] szASW = new byte[szSW.length() / 2];
-            BJCWUtil.HexToAsc(szASW, szSW.getBytes(), szSW.getBytes().length);
-            if (szASW[0] == 0x61) {
-                GetResponse[4] = szASW[1];
-                char[] szHexReadData = new char[GetResponse.length * 2];
-                BJCWUtil.AscToHex(szHexReadData, GetResponse, GetResponse.length);
-                String strCmd = new String(szHexReadData);
-                Log.e("YJL", "strCmd===" + strCmd);
-                String cmd = PubUtils.sendApdu(PubUtils.sendApduIc((byte) 0x20, strCmd, 20), 20);
-                writeRXCharacteristic(BJCWUtil.StrToHex(cmd));
-                builder = new StringBuilder();
-                Log.e("YJL", "cmd===" + cmd + "接触2===" + PubUtils.COMMAND_IC_CONTACT[2]);
+            if (strReply.length() < 4) {
+                Log.e("YJL", "icReadCard 0101 error 1");
+            } else {
+                String szSW = strReply.substring(strReply.length() - 4);
+                byte[] szASW = new byte[szSW.length() / 2];
+                BJCWUtil.HexToAsc(szASW, szSW.getBytes(), szSW.getBytes().length);
+                if (szASW[0] == 0x61) {
+                    GetResponse[4] = szASW[1];
+                    char[] szHexReadData = new char[GetResponse.length * 2];
+                    BJCWUtil.AscToHex(szHexReadData, GetResponse, GetResponse.length);
+                    String strCmd = new String(szHexReadData);
+                    Log.e("YJL", "strCmd===" + strCmd);
+                    String cmd = PubUtils.sendApdu(PubUtils.sendApduIc((byte) 0x20, strCmd, 20), 20);
+                    writeRXCharacteristic(BJCWUtil.StrToHex(cmd));
+                    builder = new StringBuilder();
+                    Log.e("YJL", "cmd===" + cmd + "接触2===" + PubUtils.COMMAND_IC_CONTACT[2]);
+                }
             }
         } else if (index == 3) {
             String strReply = result.substring(26, result.length() - 4);// 4
@@ -663,11 +677,18 @@ public class BluetoothGattUtil extends BluetoothGattCallback {
             }
         } else if (index == 5) {
             String strReply = result.substring(20, result.length() - 4);// 4
-            String results = PubUtils.getCardNum(strReply);
-            Log.e("YJL", "卡号" + results);
-            SWdataBean.SetCardNum(results);
-            builder = new StringBuilder();
-            writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_CONTACT_6));
+            if (strReply.length() < 26) {
+                Log.e("YJL", "icReadCard  00B2 error 数据错误");
+                //上电寻卡失败
+                mCallBack.getDataFail(100);
+                builder = new StringBuilder();
+            } else {
+                String results = PubUtils.getCardNum(strReply);
+                Log.e("YJL", "卡号" + results);
+                SWdataBean.SetCardNum(results);
+                builder = new StringBuilder();
+                writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_CONTACT_6));
+            }
         }
     }
 

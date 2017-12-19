@@ -173,7 +173,7 @@ public class CWSDK {
 
             int nCount = 0;
             LogOut("connectionDevice IN");
-            if (device.getName().startsWith("CW") || device.getName().startsWith("BJ")) {
+//            if (device.getName().startsWith("CW") || device.getName().startsWith("BJ")) {
                 LogOut("正在连接安全 盒子设备");
                 if (bActionFound) {
                     LogOut("设备已连接 ，无需再次连接");
@@ -210,9 +210,9 @@ public class CWSDK {
                     IDataBeanCallback.postData(SWdataBean);
                 }
 
-            } else {
-                LogOut("设备不符合连接要求！");
-            }
+//            } else {
+//                LogOut("设备不符合连接要求！");
+//            }
             LogOut("connectionDevice OUT");
         }
     }
@@ -717,6 +717,7 @@ public class CWSDK {
                 switch (g_nConnectState) {
                     case BluetoothDevice.BOND_NONE: {
                         LogOut("CHANGED：BOND_NONE " + device.getName());
+
                         //兼容发卡箱
                         //NoBondDevice();
                     }
@@ -727,6 +728,8 @@ public class CWSDK {
                     case BluetoothDevice.BOND_BONDED:
                         LogOut("CHANGED：BOND_BONDED " + device.getName());
                         // connectionDevice(device);
+                        DevicesStr = "已配对|" + device.getName() + "|" + device.getAddress();
+                        SendtoUIMessage(DevicesStr, 1);
                         break;
                 }
                 // }

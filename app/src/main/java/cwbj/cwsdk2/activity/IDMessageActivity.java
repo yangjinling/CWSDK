@@ -97,13 +97,25 @@ public class IDMessageActivity extends Activity implements View.OnClickListener 
             @Override
             public void handleMessage(Message msg) {
                 prograssBar.setVisibility(View.INVISIBLE);
-                if (msg.obj.toString().length() > 0) {
-                    identitys.parserData(msg.obj.toString(), msg.obj.toString().length());
-                    DataBean swDataBean = new DataBean();
-                    swDataBean.SetPhoto(identitys.getBmpUser());
-                    swDataBean.SetInformation(identitys.strIdDate);
-                    showIDIDinfo(swDataBean);
+                switch (msg.what) {
+                    case 1:
+                        if (msg.obj.toString().length() > 0) {
+                            identitys.parserData(msg.obj.toString(), msg.obj.toString().length());
+                            DataBean swDataBean = new DataBean();
+                            swDataBean.SetPhoto(identitys.getBmpUser());
+                            swDataBean.SetInformation(identitys.strIdDate);
+                            showIDIDinfo(swDataBean);
+                        }
+                        break;
+                    case 0:
+                        //connect服务器失败
+                        client.openClientThread();
+                        break;
+                    case 2:
+                        Toast.makeText(IDMessageActivity.this, "" + msg.obj.toString(), Toast.LENGTH_SHORT).show();
+                        break;
                 }
+
             }
         };
         identitys = new ParserIdentity();
@@ -114,7 +126,7 @@ public class IDMessageActivity extends Activity implements View.OnClickListener 
             client = new SocketClient();
             //服务端的IP地址和端口号
 //                    client.clintValue(getApplicationContext(), "192.168.0.48", 9999);
-            client.clintValue(getApplicationContext(), "172.16.39.182", 9999, wifiHandler);
+            client.clintValue(getApplicationContext(), PubUtils.ip, 9999, wifiHandler);
             //开启客户端接收消息线程
             client.openClientThread();
         } else {
@@ -145,16 +157,16 @@ public class IDMessageActivity extends Activity implements View.OnClickListener 
                     }
 
                     @Override
-                    public void getDataFail(int code) {
-                        if (code == 1) {
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    prograssBar.setVisibility(View.INVISIBLE);
-                                }
-                            });
+                    public void getDataFail(final int code) {
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(IDMessageActivity.this, "" + code, Toast.LENGTH_SHORT).show();
+                                prograssBar.setVisibility(View.INVISIBLE);
+                            }
+                        });
 //                        bluetoothGattUtil.writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.COMMAND_IDCARD[0]));
-                        }
                     }
 
                     @Override
@@ -290,6 +302,8 @@ public class IDMessageActivity extends Activity implements View.OnClickListener 
 
                 } else {
                     //updateUIMsg("读取身份证失败，是否重新读取？", 4);
+                    Toast.makeText(IDMessageActivity.this, "读取身份证超时", Toast.LENGTH_SHORT).show();
+                    prograssBar.setVisibility(View.GONE);
                 }
                 break;
             }
@@ -309,6 +323,7 @@ public class IDMessageActivity extends Activity implements View.OnClickListener 
                     }
                 } else {
                     //  updateUIMsg("读取卡失败，是否重新读取？", 5);
+
                 }
                 break;
             }

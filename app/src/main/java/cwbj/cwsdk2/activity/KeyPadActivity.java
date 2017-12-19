@@ -98,21 +98,33 @@ public class KeyPadActivity extends Activity {
         wifiHandler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
-                if (PubUtils.isMi) {
-                    SMS4Class smscala = new SMS4Class();
-                    if (null != msg.obj.toString() && msg.obj.toString().length() > 0) {
-                        if (null != msg.obj.toString()) {
+                switch (msg.what) {
+                    case 1:
+                        if (PubUtils.isMi) {
+                            SMS4Class smscala = new SMS4Class();
+                            if (null != msg.obj.toString() && msg.obj.toString().length() > 0) {
+                                if (null != msg.obj.toString()) {
+                                    prograssBar.setVisibility(View.INVISIBLE);
+                                    int[] cipher = smscala.SMS4ValueToIntArray(msg.obj.toString());
+                                    int[] plain1 = smscala.decrypt(cipher, key);
+                                    String strplain = smscala.SMS4ValueToString(plain1);
+                                    tv2.setText(msg.obj.toString());
+                                    tv3.setText(strplain);
+                                }
+                            }
+                        } else {
                             prograssBar.setVisibility(View.INVISIBLE);
-                            int[] cipher = smscala.SMS4ValueToIntArray(msg.obj.toString());
-                            int[] plain1 = smscala.decrypt(cipher, key);
-                            String strplain = smscala.SMS4ValueToString(plain1);
-                            tv2.setText(msg.obj.toString());
-                            tv3.setText(strplain);
+                            tv1.setText(msg.obj.toString());
                         }
-                    }
-                } else {
-                    prograssBar.setVisibility(View.INVISIBLE);
-                    tv1.setText(msg.obj.toString());
+                        break;
+                    case 0:
+                        //connect服务器失败
+                        client.openClientThread();
+                        break;
+                    case 2:
+                        Toast.makeText(KeyPadActivity.this, "" + msg.obj.toString(), Toast.LENGTH_SHORT).show();
+                        break;
+
                 }
             }
         };
@@ -121,7 +133,7 @@ public class KeyPadActivity extends Activity {
             client = new SocketClient();
             //服务端的IP地址和端口号
 //                    client.clintValue(getApplicationContext(), "192.168.0.48", 9999);
-            client.clintValue(getApplicationContext(), "172.16.39.182", 9999, wifiHandler);
+            client.clintValue(getApplicationContext(),PubUtils.ip, 9999, wifiHandler);
             //开启客户端接收消息线程
             client.openClientThread();
         } else {
@@ -161,10 +173,11 @@ public class KeyPadActivity extends Activity {
                     }
 
                     @Override
-                    public void getDataFail(int code) {
+                    public void getDataFail(final int code) {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
+                                Toast.makeText(KeyPadActivity.this, "" + code, Toast.LENGTH_SHORT).show();
                                 prograssBar.setVisibility(View.INVISIBLE);
                             }
                         });
