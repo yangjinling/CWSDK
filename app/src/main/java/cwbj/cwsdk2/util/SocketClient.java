@@ -159,8 +159,21 @@ public class SocketClient {
                                         index++;
                                         Log.e("YJL", "index===" + index);
                                         if (index == 1) {
-                                            sendMsg(BJCWUtil.StrToHex(PubUtils.sendApdu(PubUtils.sendApduIc((byte) 0x20, "00a4040007A0000003330101", 20), 20)));
-                                            stringBuilder = new StringBuilder();
+                                            if (stringBuilder.toString().length() <= 30) {
+                                                countError++;
+                                                if (countError <= 4) {
+                                                    stringBuilder = new StringBuilder();
+                                                    index = 0;
+                                                    sendMsg(1);
+                                                } else {
+                                                    index = 5;
+                                                    stringBuilder = new StringBuilder();
+                                                    sendMsg(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_CONTACT_6));
+                                                }
+                                            } else {
+                                                sendMsg(BJCWUtil.StrToHex(PubUtils.sendApdu(PubUtils.sendApduIc((byte) 0x20, "00a4040007A0000003330101", 20), 20)));
+                                                stringBuilder = new StringBuilder();
+                                            }
                                         } else if (index == 2) {
                                             sendContact(2, result);
                                         } else if (index == 3) {
@@ -189,8 +202,21 @@ public class SocketClient {
                                         index++;
                                         Log.e("YJL", "index===" + index);
                                         if (index == 1) {
-                                            sendMsg(BJCWUtil.StrToHex(PubUtils.sendApdu(PubUtils.sendApduIc((byte) 0x10, "00a4040007A0000003330101", 20), 20)));
-                                            stringBuilder = new StringBuilder();
+                                            if (stringBuilder.toString().length() <= 30) {
+                                                countError++;
+                                                if (countError <= 4) {
+                                                    stringBuilder = new StringBuilder();
+                                                    index = 0;
+                                                    sendMsg(2);
+                                                } else {
+                                                    index = 3;
+                                                    stringBuilder = new StringBuilder();
+                                                    sendMsg(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_NOCONTACT_4));
+                                                }
+                                            } else {
+                                                sendMsg(BJCWUtil.StrToHex(PubUtils.sendApdu(PubUtils.sendApduIc((byte) 0x10, "00a4040007A0000003330101", 20), 20)));
+                                                stringBuilder = new StringBuilder();
+                                            }
                                         } else if (index == 2) {
                                             sendNoContact(2, result);
                                         } else if (index == 3) {
@@ -302,7 +328,7 @@ public class SocketClient {
                                         //非接触
                                         countError++;
                                         if (countError <= 4) {
-                                            index=0;
+                                            index = 0;
                                             stringBuilder = new StringBuilder();
                                             sendMsg(1);
                                         } else {
@@ -314,7 +340,7 @@ public class SocketClient {
                                         //非接触
                                         countError++;
                                         if (countError <= 4) {
-                                            index=0;
+                                            index = 0;
                                             stringBuilder = new StringBuilder();
                                             sendMsg(2);
                                         } else {

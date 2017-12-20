@@ -407,8 +407,21 @@ public class BluetoothGattUtil extends BluetoothGattCallback {
                     index++;
                     Log.e("YJL", "index===" + index);
                     if (index == 1) {
-                        writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.sendApdu(PubUtils.sendApduIc((byte) 0x10, "00a4040007A0000003330101", 20), 20)));
-                        builder = new StringBuilder();
+                        if (builder.toString().length() <= 30) {
+                            errorcount++;
+                            if (errorcount <= 4) {
+                                builder = new StringBuilder();
+                                index = 0;
+                                writeRXCharacteristic(2);
+                            } else {
+                                index = 3;
+                                builder = new StringBuilder();
+                                writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_NOCONTACT_4));
+                            }
+                        } else {
+                            writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.sendApdu(PubUtils.sendApduIc((byte) 0x10, "00a4040007A0000003330101", 20), 20)));
+                            builder = new StringBuilder();
+                        }
                     } else if (index == 2) {
                         sendNoContact(2, result);
                     } else if (index == 3) {
