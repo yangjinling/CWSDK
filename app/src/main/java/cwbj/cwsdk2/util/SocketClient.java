@@ -170,12 +170,19 @@ public class SocketClient {
                                         } else if (index == 5) {
                                             sendContact(5, result);
                                         } else if (index == 6) {
-                                            Message msg = new Message();
-                                            msg.obj = SWdataBean.GetCardNum() + "\r\n" + SWdataBean.ICcardInfo;
-                                            msg.what = 1;
-                                            mHandler.sendMessage(msg);
-                                            stringBuilder = new StringBuilder();
-                                            index = 0;
+                                            if (countError > 0) {
+                                                index = 0;
+                                                countError = 0;
+                                                dealDate("寻卡失败", 100);
+                                            } else {
+                                                Message msg = new Message();
+                                                msg.obj = SWdataBean.GetCardNum() + "\r\n" + SWdataBean.ICcardInfo;
+                                                msg.what = 1;
+                                                mHandler.sendMessage(msg);
+                                                stringBuilder = new StringBuilder();
+                                                countError = 0;
+                                                index = 0;
+                                            }
                                         }
                                     } else if (mType == 2) {
                                         //非接触卡
@@ -189,12 +196,20 @@ public class SocketClient {
                                         } else if (index == 3) {
                                             sendNoContact(3, result);
                                         } else if (index == 4) {
-                                            Message msg = new Message();
-                                            msg.obj = SWdataBean.GetCardNum() + "\r\n" + SWdataBean.ICcardInfo;
-                                            msg.what = 1;
-                                            mHandler.sendMessage(msg);
-                                            stringBuilder = new StringBuilder();
-                                            index = 0;
+                                            if (countError > 0) {
+                                                index = 0;
+                                                countError = 0;
+                                                dealDate("寻卡失败", 100);
+                                            } else {
+                                                Message msg = new Message();
+                                                msg.obj = SWdataBean.GetCardNum() + "\r\n" + SWdataBean.ICcardInfo;
+                                                msg.what = 1;
+                                                mHandler.sendMessage(msg);
+                                                stringBuilder = new StringBuilder();
+                                                countError = 0;
+                                                index = 0;
+                                            }
+
                                         }
                                     } else if (mType == 3) {
                                         //身份证
@@ -283,7 +298,34 @@ public class SocketClient {
                                     }
                                 } else {
                                     //数据完整错误码
-                                    dealDate("" + pulSW, 2);
+                                    if (mType == 1) {
+                                        //非接触
+                                        countError++;
+                                        if (countError <= 4) {
+                                            index=0;
+                                            stringBuilder = new StringBuilder();
+                                            sendMsg(1);
+                                        } else {
+                                            index = 5;
+                                            stringBuilder = new StringBuilder();
+                                            sendMsg(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_CONTACT_6));
+                                        }
+                                    } else if (mType == 2) {
+                                        //非接触
+                                        countError++;
+                                        if (countError <= 4) {
+                                            index=0;
+                                            stringBuilder = new StringBuilder();
+                                            sendMsg(2);
+                                        } else {
+                                            index = 3;
+                                            stringBuilder = new StringBuilder();
+                                            sendMsg(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_NOCONTACT_4));
+                                        }
+
+                                    } else {
+                                        dealDate("" + pulSW, 2);
+                                    }
                                 }
                             }
                         }
@@ -444,10 +486,13 @@ public class SocketClient {
         r.write(buffer);
     }
 
+    private int countError = 0;
+
     private void sendNoContact(int index, String result) {
         if (index == 2) {
             String strReply = result.substring(26, result.length() - 4);// 4
             if (strReply.length() > 26) {
+                countError = 0;
                 PbocDataElementsClass pde = new PbocDataElementsClass();
                 String strdata = strReply.substring(0, strReply.length() - 4);
                 Log.e("YJL", "strdata==" + strdata);
@@ -470,10 +515,17 @@ public class SocketClient {
             String strReply = result.substring(20, result.length() - 4);// 4
             if (strReply.length() < 26) {
                 Log.e("YJL", "icReadCard  00B2 error 数据错误");
-                //上电寻卡失败
-                dealDate("寻卡失败", 100);
+                countError++;
+                if (countError < 6) {
+                    this.index = 0;
+                    sendMsg(2);
+                } else {
+                    this.index = 3;
+                    sendMsg(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_NOCONTACT_4));
+                }
                 stringBuilder = new StringBuilder();
             } else {
+                countError = 0;
                 String resultCardNum = PubUtils.getCardNum(strReply);
                 SWdataBean.SetCardNum(resultCardNum);
                 Log.e("YJL", "卡号" + resultCardNum);
@@ -486,19 +538,46 @@ public class SocketClient {
     private void sendContact(int index, String result) {
         if (index == 2) {
             String strReply = result.substring(26, result.length() - 4);
-            String szSW = strReply.substring(strReply.length() - 4);
-            byte[] szASW = new byte[szSW.length() / 2];
-            BJCWUtil.HexToAsc(szASW, szSW.getBytes(), szSW.getBytes().length);
-            if (szASW[0] == 0x61) {
-                GetResponse[4] = szASW[1];
-                char[] szHexReadData = new char[GetResponse.length * 2];
-                BJCWUtil.AscToHex(szHexReadData, GetResponse, GetResponse.length);
-                String strCmd = new String(szHexReadData);
-                Log.e("YJL", "strCmd===" + strCmd);
-                String cmd = PubUtils.sendApdu(PubUtils.sendApduIc((byte) 0x20, strCmd, 20), 20);
-                sendMsg(BJCWUtil.StrToHex(cmd));
-                stringBuilder = new StringBuilder();
-                Log.e("YJL", "cmd===" + cmd + "接触2===" + PubUtils.COMMAND_IC_CONTACT[2]);
+            if (strReply.length() < 4) {
+                Log.e("YJL", "icReadCard 0101 error 1");
+                //上电寻卡失败
+                countError++;
+                if (countError < 6) {
+                    this.index = 0;
+                    stringBuilder = new StringBuilder();
+                    sendMsg(1);
+                } else {
+                    this.index = 5;
+                    stringBuilder = new StringBuilder();
+                    sendMsg(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_CONTACT_6));
+                }
+            } else {
+                String szSW = strReply.substring(strReply.length() - 4);
+                byte[] szASW = new byte[szSW.length() / 2];
+                BJCWUtil.HexToAsc(szASW, szSW.getBytes(), szSW.getBytes().length);
+                if (szASW[0] == 0x61) {
+                    GetResponse[4] = szASW[1];
+                    char[] szHexReadData = new char[GetResponse.length * 2];
+                    BJCWUtil.AscToHex(szHexReadData, GetResponse, GetResponse.length);
+                    String strCmd = new String(szHexReadData);
+                    Log.e("YJL", "strCmd===" + strCmd);
+                    String cmd = PubUtils.sendApdu(PubUtils.sendApduIc((byte) 0x20, strCmd, 20), 20);
+                    sendMsg(BJCWUtil.StrToHex(cmd));
+                    stringBuilder = new StringBuilder();
+                    Log.e("YJL", "cmd===" + cmd + "接触2===" + PubUtils.COMMAND_IC_CONTACT[2]);
+                } else {
+                    //上电寻卡失败
+                    countError++;
+                    if (countError < 6) {
+                        this.index = 0;
+                        stringBuilder = new StringBuilder();
+                        sendMsg(1);
+                    } else {
+                        this.index = 5;
+                        stringBuilder = new StringBuilder();
+                        sendMsg(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_CONTACT_6));
+                    }
+                }
             }
         } else if (index == 3) {
             String strReply = result.substring(26, result.length() - 4);// 4
@@ -509,18 +588,31 @@ public class SocketClient {
                 pde.AnalysisDataElementsSubProcess_OneTime(strdata);
                 pde.AnalysisDataElementsProcess();
                 SWdataBean.ICcardInfo = pde.ResultInfoShow;
+                Log.e("YJL", "获取到的数据" + SWdataBean.ICcardInfo);
+                ReadRecord[3] = (byte) ((SFI << (byte) 3) | (byte) 0x04);
+                Log.e("YJL", "icResetCard 11");
+                char[] szHexReadData = new char[ReadRecord.length * 2];
+                BJCWUtil.AscToHex(szHexReadData, ReadRecord, ReadRecord.length);
+                String strCmd = new String(szHexReadData);
+                Log.e("YJL", "icResetCard 12");
+                Log.e("YJL", "strCmd===" + strCmd);
+                String cmd = PubUtils.sendApdu(PubUtils.sendApduIc((byte) 0x20, strCmd, 20), 20);
+                stringBuilder = new StringBuilder();
+                sendMsg(BJCWUtil.StrToHex(cmd));
+            } else {
+                //上电寻卡失败
+                countError++;
+                if (countError < 6) {
+                    this.index = 0;
+                    stringBuilder = new StringBuilder();
+                    sendMsg(1);
+                } else {
+                    this.index = 5;
+                    stringBuilder = new StringBuilder();
+                    sendMsg(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_CONTACT_6));
+                }
             }
-            Log.e("YJL", "获取到的数据" + SWdataBean.ICcardInfo);
-            ReadRecord[3] = (byte) ((SFI << (byte) 3) | (byte) 0x04);
-            Log.e("YJL", "icResetCard 11");
-            char[] szHexReadData = new char[ReadRecord.length * 2];
-            BJCWUtil.AscToHex(szHexReadData, ReadRecord, ReadRecord.length);
-            String strCmd = new String(szHexReadData);
-            Log.e("YJL", "icResetCard 12");
-            Log.e("YJL", "strCmd===" + strCmd);
-            String cmd = PubUtils.sendApdu(PubUtils.sendApduIc((byte) 0x20, strCmd, 20), 20);
-            stringBuilder = new StringBuilder();
-            sendMsg(BJCWUtil.StrToHex(cmd));
+
         } else if (index == 4) {
             String strReply = result.substring(6, result.length() - 4);// 4
             String szSW = strReply.substring(strReply.length() - 4);
@@ -539,13 +631,29 @@ public class SocketClient {
                 sendMsg(BJCWUtil.StrToHex(cmd));
                 stringBuilder = new StringBuilder();
                 Log.e("YJL", "cmd===" + cmd + "接触4===" + PubUtils.COMMAND_IC_CONTACT[3]);
+            } else {  //上电寻卡失败
+                countError++;
+                if (countError < 6) {
+                    this.index = 0;
+                    stringBuilder = new StringBuilder();
+                    sendMsg(1);
+                } else {
+                    this.index = 5;
+                    stringBuilder = new StringBuilder();
+                    sendMsg(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_CONTACT_6));
+                }
             }
         } else if (index == 5) {
             String strReply = result.substring(20, result.length() - 4);// 4
             if (strReply.length() < 26) {
-                Log.e("YJL", "icReadCard  00B2 error 数据错误");
-                //100上电寻卡失败
-                dealDate("上电寻卡失败", 100);
+                countError++;
+                if (countError < 6) {
+                    this.index = 0;
+                    sendMsg(1);
+                } else {
+                    this.index = 5;
+                    sendMsg(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_NOCONTACT_4));
+                }
             } else {
                 String results = PubUtils.getCardNum(strReply);
                 Log.e("YJL", "卡号" + results);
