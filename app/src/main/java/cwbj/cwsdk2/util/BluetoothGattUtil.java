@@ -541,6 +541,12 @@ public class BluetoothGattUtil extends BluetoothGattCallback {
                         writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_NOCONTACT_4));
                     }
 
+                } else if (mType == 3) {
+                    //超时
+                    writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.sendApdu("FB810001000000", 5)));
+                    mCallBack.getDataFail(pulSW);
+                    index = 1;
+                    builder = new StringBuilder();
                 } else {
                     mCallBack.getDataFail(pulSW);
                     builder = new StringBuilder();

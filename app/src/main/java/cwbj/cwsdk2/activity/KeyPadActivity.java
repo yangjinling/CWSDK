@@ -128,7 +128,6 @@ public class KeyPadActivity extends Activity {
                 }
             }
         };
-        WorkDev = cwsdk.GetBlueToothDevicesByMAC(sMAC);
         if (PubUtils.isWifi) {
             client = new SocketClient();
             //服务端的IP地址和端口号
@@ -137,6 +136,7 @@ public class KeyPadActivity extends Activity {
             //开启客户端接收消息线程
             client.openClientThread();
         } else {
+            WorkDev = cwsdk.GetBlueToothDevicesByMAC(sMAC);
             if (PubUtils.isBle) {
                 bluetoothGattUtil = BluetoothGattUtil.getInstance();
                 WorkDev.connectGatt(KeyPadActivity.this, false, bluetoothGattUtil);

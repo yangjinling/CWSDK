@@ -64,7 +64,6 @@ public class GetVerActivity extends Activity implements View.OnClickListener {
         tv_title = ((TextView) findViewById(R.id.main_title));
         tv_title.setText(R.string.action_settings);
         prograssBar = ((ProgressBar) findViewById(R.id.prograss));
-        WorkDev = cwsdk.GetBlueToothDevicesByMAC(sMAC);
         bluetoothHandler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
@@ -104,6 +103,7 @@ public class GetVerActivity extends Activity implements View.OnClickListener {
             //开启客户端接收消息线程
             client.openClientThread();
         } else {
+            WorkDev = cwsdk.GetBlueToothDevicesByMAC(sMAC);
             if (PubUtils.isBle) {
                 bluetoothGattUtil = BluetoothGattUtil.getInstance();
                 WorkDev.connectGatt(GetVerActivity.this, false, bluetoothGattUtil);
@@ -146,8 +146,6 @@ public class GetVerActivity extends Activity implements View.OnClickListener {
             } else {
                 cwsdk.initialize(GetVerActivity.this, true, bluetoothHandler);
                 cwsdk.workmode = 1;
-
-                //cw_imate.IDataBeanCallback = null;
                 cwsdk.IDataBeanCallback = new DataBeanCallback() {
                     @Override
                     public Boolean postData(DataBean dataBean) {

@@ -66,7 +66,6 @@ public class WorkActivity extends Activity implements View.OnClickListener {
         tv = (TextView) findViewById(R.id.textViewcn);
         btc = (Button) findViewById(R.id.button);
         btcl = (Button) findViewById(R.id.button2);
-
         sMAC = null;
         sMAC = getIntent().getStringExtra("MAC");
         prograssBar = ((ProgressBar) findViewById(R.id.prograss));
@@ -102,7 +101,6 @@ public class WorkActivity extends Activity implements View.OnClickListener {
                 }
             }
         };
-        WorkDev = cwsdk.GetBlueToothDevicesByMAC(sMAC);
 //        initCommad();
         if (PubUtils.isWifi) {
             //wifi通信，初始化
@@ -113,6 +111,7 @@ public class WorkActivity extends Activity implements View.OnClickListener {
             //开启客户端接收消息线程
             client.openClientThread();
         } else {
+            WorkDev = cwsdk.GetBlueToothDevicesByMAC(sMAC);
             if (PubUtils.isBle) {
                 //ble通信，初始化
                 bluetoothGattUtil = BluetoothGattUtil.getInstance();

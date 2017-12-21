@@ -120,7 +120,6 @@ public class IDMessageActivity extends Activity implements View.OnClickListener 
         };
         identitys = new ParserIdentity();
         identitys.mContext = this;
-        WorkDev = cwsdk.GetBlueToothDevicesByMAC(sMAC);
         final DataBean swDataBean = new DataBean();
         if (PubUtils.isWifi) {
             client = new SocketClient();
@@ -130,6 +129,7 @@ public class IDMessageActivity extends Activity implements View.OnClickListener 
             //开启客户端接收消息线程
             client.openClientThread();
         } else {
+            WorkDev = cwsdk.GetBlueToothDevicesByMAC(sMAC);
             if (PubUtils.isBle) {
                 //ble通信
                 bluetoothGattUtil = BluetoothGattUtil.getInstance();
@@ -194,7 +194,7 @@ public class IDMessageActivity extends Activity implements View.OnClickListener 
                 prograssBar.setVisibility(View.VISIBLE);
                 if (PubUtils.isWifi) {
                     //socket通信
-                    client.sendMsg(BJCWUtil.StrToHex(PubUtils.COMMAND_IDCARD[0]));
+                    client.sendMsg(3);
                 } else {
                     if (PubUtils.isBle) {
                         if (isCanWrite) {

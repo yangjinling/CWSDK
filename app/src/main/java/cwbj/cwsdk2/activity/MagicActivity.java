@@ -74,12 +74,17 @@ public class MagicActivity extends Activity implements View.OnClickListener {
         handler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
+                prograssBar.setVisibility(View.INVISIBLE);
+                switch (msg.what) {
+                    case 9:
+                        Show3Tracks(msg.obj.toString());
+                        break;
+                    case 7:
+                        Toast.makeText(MagicActivity.this, "" + msg.obj.toString(), Toast.LENGTH_SHORT).show();
+                        break;
 
-                if (msg.what == 0x9) {
-                    //showIDIDinfo();
-                    prograssBar.setVisibility(View.INVISIBLE);
-                    Show3Tracks(msg.obj.toString());
                 }
+
 
             }
         };
@@ -102,7 +107,6 @@ public class MagicActivity extends Activity implements View.OnClickListener {
                 }
             }
         };
-        WorkDev = cwsdk.GetBlueToothDevicesByMAC(sMAC);
         if (PubUtils.isWifi) {
             client = new SocketClient();
             //服务端的IP地址和端口号
@@ -111,6 +115,7 @@ public class MagicActivity extends Activity implements View.OnClickListener {
             //开启客户端接收消息线程
             client.openClientThread();
         } else {
+            WorkDev = cwsdk.GetBlueToothDevicesByMAC(sMAC);
             if (PubUtils.isBle) {
                 bluetoothGattUtil = BluetoothGattUtil.getInstance();
                 WorkDev.connectGatt(MagicActivity.this, false, bluetoothGattUtil);
@@ -169,7 +174,7 @@ public class MagicActivity extends Activity implements View.OnClickListener {
                 prograssBar.setVisibility(View.VISIBLE);
                 if (PubUtils.isWifi) {
                     //socket通信
-                    client.sendMsg(BJCWUtil.StrToHex(PubUtils.COMMAND_MAGNETIC));
+                    client.sendMsg(4);
                 } else {
                     if (PubUtils.isBle) {
                         if (isCanWrite) {

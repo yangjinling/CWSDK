@@ -89,12 +89,18 @@ public class SocketClient {
                 e.printStackTrace();
                 KLog.e(e);
                 KLog.e("YJL3" + client);
+                isClient = false;
+                KLog.e("连接失败" + "site=" + site + " ,port=" + port);
+                Message msg = new Message();
+                msg.what = 0;
+                mHandler.sendMessage(msg);
             }
         }
 
         public void cancel() {
             try {
-                client.close();
+                if (null != client)
+                    client.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -323,6 +329,7 @@ public class SocketClient {
                                         dealDate(result, 1);
                                     }
                                 } else {
+                                    Log.e("YJL", "mType===" + mType);
                                     //数据完整错误码
                                     if (mType == 1) {
                                         //非接触
@@ -349,6 +356,12 @@ public class SocketClient {
                                             sendMsg(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_NOCONTACT_4));
                                         }
 
+                                    } else if (mType == 3) {
+                                        //身份证超时
+                                        sendMsg(BJCWUtil.StrToHex(PubUtils.sendApdu("FB810001000000", 5)));
+                                        dealDate("" + pulSW, 2);
+                                        index = 1;
+                                        stringBuilder = new StringBuilder();
                                     } else {
                                         dealDate("" + pulSW, 2);
                                     }
@@ -497,7 +510,8 @@ public class SocketClient {
             mType = 9;
             value = BJCWUtil.StrToHex(/*"09" + */PubUtils.sendApdu("FB803400000000", 20));
         }
-        r.write(value);
+        if (r != null)
+            r.write(value);
     }
 
     public void sendMsg(final byte[] buffer) {

@@ -16,7 +16,10 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.net.URL;
+
 import cwbj.cwsdk2.R;
+import cwbj.cwsdk2.util.PrefUtils;
 import cwbj.cwsdk2.util.PubUtils;
 
 public class MainActivity extends AppCompatActivity {
@@ -81,13 +84,14 @@ public class MainActivity extends AppCompatActivity {
 
     private void ChangeURL() {
         final EditText editText = new EditText(this);
-        editText.setText(PubUtils.ip);
+        editText.setText(PrefUtils.getString(MainActivity.this, "URL", "172.20.10.3"));
         new AlertDialog.Builder(this).setTitle("修改URL").setView(editText)
                 .setNegativeButton("确定", new DialogInterface.OnClickListener() {
 
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         String url = editText.getText().toString();
+                        PrefUtils.setString(MainActivity.this, "URL",url);
                         PubUtils.ip = url;
                     }
                 }).setPositiveButton("取消", new DialogInterface.OnClickListener() {
@@ -116,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
         if (id == R.id.action_settings) {
             /*获取固件版本*/
             if (PubUtils.isWifi) {
-                Intent intent = new Intent(MainActivity.this, WorkActivity.class);
+                Intent intent = new Intent(MainActivity.this, GetVerActivity.class);
                 intent.putExtra("MAC", SelecetedMACStr);
                 startActivity(intent);
             } else {
