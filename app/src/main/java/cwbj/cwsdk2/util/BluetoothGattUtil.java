@@ -78,43 +78,43 @@ public class BluetoothGattUtil extends BluetoothGattCallback {
         if (type == 0) {
             //0：获取版本号
             mType = 0;
-            value = BJCWUtil.StrToHex(/*"00" + */PubUtils.sendApdu("FB812000000000", 0xFF));
+            value = BJCWUtil.StrToHex(PubUtils.sendApdu("FB812000000000", 0xFF));
         } else if (type == 1) {
             //1：接触卡
             mType = 1;
-            value = BJCWUtil.StrToHex(/*"01" + */PubUtils.sendApdu(PubUtils.sendApduIc((byte) 0x20, "poweron", 20), 20));
+            value = BJCWUtil.StrToHex(PubUtils.sendApdu(PubUtils.sendApduIc((byte) 0x20, "poweron", 20), 20));
         } else if (type == 2) {
             //2：非接触卡
             mType = 2;
-            value = BJCWUtil.StrToHex(/*"02" + */PubUtils.sendApdu(PubUtils.sendApduIc((byte) 0x10, "poweron", 20), 20));
+            value = BJCWUtil.StrToHex(PubUtils.sendApdu(PubUtils.sendApduIc((byte) 0x10, "poweron", 20), 20));
         } else if (type == 3) {
             //3:读身份证
             mType = 3;
-            value = BJCWUtil.StrToHex(/*"03" + */PubUtils.sendApdu("FB801100000000", 20));
+            value = BJCWUtil.StrToHex(PubUtils.sendApdu("FB801100000000", 20));
         } else if (type == 4) {
             //4:磁条卡
             mType = 4;
-            value = BJCWUtil.StrToHex(/*"04" + */PubUtils.sendApdu("FB800014000000", 20));
+            value = BJCWUtil.StrToHex(PubUtils.sendApdu("FB800014000000", 20));
         } else if (type == 5) {
             //5:键盘输入pin--明文
             mType = 5;
-            value = BJCWUtil.StrToHex(/*"05" + */PubUtils.sendApdu("FB802380000003000001", 20));
+            value = BJCWUtil.StrToHex(PubUtils.sendApdu("FB802380000003000001", 20));
         } else if (type == 6) {
             //6:键盘输入pin--密文
             mType = 6;
-            value = BJCWUtil.StrToHex(/*"06" +*/ PubUtils.sendApdu("FB8025800000080000000000000000", 20));
+            value = BJCWUtil.StrToHex(PubUtils.sendApdu("FB8025800000080000000000000000", 20));
         } else if (type == 7) {
             //7:指纹模块版本
             mType = 7;
-            value = BJCWUtil.StrToHex(/*"07" +*/ PubUtils.sendApdu("FB803400000000", 20));
+            value = BJCWUtil.StrToHex(PubUtils.sendApdu("FB803400000000", 20));
         } else if (type == 8) {
             //8:指纹模块获取
             mType = 8;
-            value = BJCWUtil.StrToHex(/*"08" + */PubUtils.sendApdu("FB803400000000", 20));
+            value = BJCWUtil.StrToHex(PubUtils.sendApdu("FB803400000000", 20));
         } else if (type == 9) {
             //9:指纹特征获取
             mType = 9;
-            value = BJCWUtil.StrToHex(/*"09" + */PubUtils.sendApdu("FB803400000000", 20));
+            value = BJCWUtil.StrToHex(PubUtils.sendApdu("FB803400000000", 20));
         }
         BluetoothGattCharacteristic mRxChar = null;
         BluetoothGattService mRxService;

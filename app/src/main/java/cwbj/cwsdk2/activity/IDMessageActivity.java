@@ -234,7 +234,10 @@ public class IDMessageActivity extends Activity implements View.OnClickListener 
             bluetoothGattUtil.unregisterCallBack();
             bluetoothGattUtil.disconnect();
         }
-
+        if (null != client) {
+            client.unregisterHandler();
+            client.disconnect();
+        }
     }
 
     @Override
