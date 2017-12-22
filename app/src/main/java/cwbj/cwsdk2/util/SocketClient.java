@@ -220,6 +220,7 @@ public class SocketClient {
                                                     sendMsg(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_NOCONTACT_4));
                                                 }
                                             } else {
+                                                countError=0;
                                                 sendMsg(BJCWUtil.StrToHex(PubUtils.sendApdu(PubUtils.sendApduIc((byte) 0x10, "00a4040007A0000003330101", 20), 20)));
                                                 stringBuilder = new StringBuilder();
                                             }
@@ -251,6 +252,7 @@ public class SocketClient {
                                             dealDate(result, 1);
                                         } else {
                                             stringBuilder = new StringBuilder();
+                                            countError=0;
                                             index = 0;
                                         }
                                     } else if (mType == 6) {
@@ -539,17 +541,28 @@ public class SocketClient {
                 pde.AnalysisDataElementsSubProcess_OneTime(strdata);
                 pde.AnalysisDataElementsProcess();
                 SWdataBean.ICcardInfo = pde.ResultInfoShow;
+                Log.e("YJL", "获取到的数据" + SWdataBean.ICcardInfo);
+                ReadRecord[3] = (byte) ((SFI << (byte) 3) | (byte) 0x04);
+                Log.e("YJL", "icResetCard 11");
+                char[] szHexReadData = new char[ReadRecord.length * 2];
+                BJCWUtil.AscToHex(szHexReadData, ReadRecord, ReadRecord.length);
+                String strCmd = new String(szHexReadData);
+                Log.e("YJL", "strCmd===" + strCmd);
+                String cmd = PubUtils.sendApdu(PubUtils.sendApduIc((byte) 0x10, strCmd, 20), 20);
+                sendMsg(BJCWUtil.StrToHex(cmd));
+                stringBuilder = new StringBuilder();
+            } else {
+                countError++;
+                if (countError < 6) {
+                    this.index = 0;
+                    sendMsg(2);
+                } else {
+                    this.index = 3;
+                    sendMsg(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_NOCONTACT_4));
+                }
+                stringBuilder = new StringBuilder();
             }
-            Log.e("YJL", "获取到的数据" + SWdataBean.ICcardInfo);
-            ReadRecord[3] = (byte) ((SFI << (byte) 3) | (byte) 0x04);
-            Log.e("YJL", "icResetCard 11");
-            char[] szHexReadData = new char[ReadRecord.length * 2];
-            BJCWUtil.AscToHex(szHexReadData, ReadRecord, ReadRecord.length);
-            String strCmd = new String(szHexReadData);
-            Log.e("YJL", "strCmd===" + strCmd);
-            String cmd = PubUtils.sendApdu(PubUtils.sendApduIc((byte) 0x10, strCmd, 20), 20);
-            sendMsg(BJCWUtil.StrToHex(cmd));
-            stringBuilder = new StringBuilder();
+
         }
         if (index == 3) {
             String strReply = result.substring(20, result.length() - 4);// 4
@@ -596,6 +609,7 @@ public class SocketClient {
                 byte[] szASW = new byte[szSW.length() / 2];
                 BJCWUtil.HexToAsc(szASW, szSW.getBytes(), szSW.getBytes().length);
                 if (szASW[0] == 0x61) {
+                    countError = 0;
                     GetResponse[4] = szASW[1];
                     char[] szHexReadData = new char[GetResponse.length * 2];
                     BJCWUtil.AscToHex(szHexReadData, GetResponse, GetResponse.length);
@@ -622,6 +636,7 @@ public class SocketClient {
         } else if (index == 3) {
             String strReply = result.substring(26, result.length() - 4);// 4
             if (strReply.length() > 26) {
+                countError = 0;
                 PbocDataElementsClass pde = new PbocDataElementsClass();
                 String strdata = strReply.substring(0, strReply.length() - 4);
                 Log.e("YJL", "strdata==" + strdata);
@@ -660,6 +675,7 @@ public class SocketClient {
             byte[] szASW = new byte[szSW.length() / 2];
             BJCWUtil.HexToAsc(szASW, szSW.getBytes(), szSW.getBytes().length);
             if (szASW[0] == 0x6C) {
+                countError = 0;
                 // memcpy(ReadRecordFor6C, ReadRecord, 4);
                 System.arraycopy(ReadRecord, 0, ReadRecordFor6C, 0, 4);
                 Log.e("YJL", "icResetCard 14");
@@ -695,6 +711,7 @@ public class SocketClient {
                     sendMsg(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_NOCONTACT_4));
                 }
             } else {
+                countError = 0;
                 String results = PubUtils.getCardNum(strReply);
                 Log.e("YJL", "卡号" + results);
                 SWdataBean.SetCardNum(results);

@@ -377,6 +377,7 @@ public class BluetoothGattUtil extends BluetoothGattCallback {
                                 writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_CONTACT_6));
                             }
                         } else {
+                            errorcount=0;
                             writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.sendApdu(PubUtils.sendApduIc((byte) 0x20, "00a4040007A0000003330101", 20), 20)));
                             builder = new StringBuilder();
                         }
@@ -409,7 +410,7 @@ public class BluetoothGattUtil extends BluetoothGattCallback {
                     if (index == 1) {
                         if (builder.toString().length() <= 30) {
                             errorcount++;
-                            if (errorcount <= 4) {
+                            if (errorcount <= 6) {
                                 builder = new StringBuilder();
                                 index = 0;
                                 writeRXCharacteristic(2);
@@ -419,6 +420,7 @@ public class BluetoothGattUtil extends BluetoothGattCallback {
                                 writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_NOCONTACT_4));
                             }
                         } else {
+                            errorcount=0;
                             writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.sendApdu(PubUtils.sendApduIc((byte) 0x10, "00a4040007A0000003330101", 20), 20)));
                             builder = new StringBuilder();
                         }
@@ -447,6 +449,7 @@ public class BluetoothGattUtil extends BluetoothGattCallback {
                         sendData(completion, result);
                     } else {
                         builder = new StringBuilder();
+                        errorcount=0;
                         index = 0;
                     }
                 } else if (mType == 6) {
@@ -608,7 +611,7 @@ public class BluetoothGattUtil extends BluetoothGattCallback {
                 }
                 byte[] Ver = BJCWUtil.StrToHex(StringVer);
                 String sv = new String(Ver);
-                //模块版本特殊处理展示
+                //指纹模块版本特殊处理展示
                 mCallBack.dealData(0, sv);
             } else if (type == 2) {
                 //展示
@@ -657,6 +660,7 @@ public class BluetoothGattUtil extends BluetoothGattCallback {
         if (index == 2) {
             String strReply = result.substring(26, result.length() - 4);// 4
             if (strReply.length() > 26) {
+                errorcount=0;
                 PbocDataElementsClass pde = new PbocDataElementsClass();
                 String strdata = strReply.substring(0, strReply.length() - 4);
                 Log.e("YJL", "strdata==" + strdata);
@@ -676,7 +680,7 @@ public class BluetoothGattUtil extends BluetoothGattCallback {
             } else {
                 //100上电寻卡失败
                 errorcount++;
-                if (errorcount < 4) {
+                if (errorcount <8) {
                     this.index = 0;
                     builder = new StringBuilder();
                     writeRXCharacteristic(2);
@@ -693,7 +697,7 @@ public class BluetoothGattUtil extends BluetoothGattCallback {
                 Log.e("YJL", "icReadCard  00B2 error 数据错误");
                 //100上电寻卡失败
                 errorcount++;
-                if (errorcount < 4) {
+                if (errorcount < 6) {
                     this.index = 0;
                     builder = new StringBuilder();
                     writeRXCharacteristic(2);
@@ -731,6 +735,7 @@ public class BluetoothGattUtil extends BluetoothGattCallback {
                     writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_CONTACT_6));
                 }
             } else {
+                errorcount=0;
                 String szSW = strReply.substring(strReply.length() - 4);
                 byte[] szASW = new byte[szSW.length() / 2];
                 BJCWUtil.HexToAsc(szASW, szSW.getBytes(), szSW.getBytes().length);
@@ -760,6 +765,7 @@ public class BluetoothGattUtil extends BluetoothGattCallback {
         } else if (index == 3) {
             String strReply = result.substring(26, result.length() - 4);// 4
             if (strReply.length() > 26) {
+                errorcount=0;
                 PbocDataElementsClass pde = new PbocDataElementsClass();
                 String strdata = strReply.substring(0, strReply.length() - 4);
                 Log.e("YJL", "strdata==" + strdata);
@@ -797,6 +803,7 @@ public class BluetoothGattUtil extends BluetoothGattCallback {
             byte[] szASW = new byte[szSW.length() / 2];
             BJCWUtil.HexToAsc(szASW, szSW.getBytes(), szSW.getBytes().length);
             if (szASW[0] == 0x6C) {
+                errorcount=0;
                 // memcpy(ReadRecordFor6C, ReadRecord, 4);
                 System.arraycopy(ReadRecord, 0, ReadRecordFor6C, 0, 4);
                 Log.e("YJL", "icResetCard 14");
@@ -836,6 +843,7 @@ public class BluetoothGattUtil extends BluetoothGattCallback {
                     writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_CONTACT_6));
                 }
             } else {
+                errorcount=0;
                 String results = PubUtils.getCardNum(strReply);
                 Log.e("YJL", "卡号" + results);
                 errorcount = 0;
