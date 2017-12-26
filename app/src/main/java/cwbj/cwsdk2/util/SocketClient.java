@@ -150,222 +150,250 @@ public class SocketClient {
                         for (int i = 0; i < bytes; i++) {
                             buf_data[i] = buffer[i];
                         }
-                        strReadDate = BJCWUtil.HexTostr(buf_data, buf_data.length);
-                        stringBuilder.append(strReadDate);
-                        Log.e("YJL", "strReadDate===" + strReadDate);
-                        if (null != strReadDate) {
+                        if (mType == 7) {
+                            strReadDate = new String(buf_data, 0, buf_data.length);
+                            stringBuilder.append(strReadDate);
                             String result = stringBuilder.toString();
                             String strSW = result.substring(result.length() - 4);
                             int pulSW = Integer.valueOf(strSW, 16);
-                            boolean completion = PubUtils.judgeData(result);
-                            if (completion) {
-                                if (pulSW == 0x9000) {
-                                    if (mType == 1) {
-                                        //接触卡
-                                        index++;
-                                        Log.e("YJL", "index===" + index);
-                                        if (index == 1) {
-                                            if (stringBuilder.toString().length() <= 30) {
-                                                countError++;
-                                                if (countError <= 4) {
-                                                    stringBuilder = new StringBuilder();
-                                                    index = 0;
-                                                    sendMsg(1);
+                            if (pulSW == 0x9000) {
+                                dealDate(result.substring(0, result.length() - 4), 2, 8);
+                            }
+                        } else if (mType == 8) {
+                            strReadDate = new String(buf_data, 0, buf_data.length);
+                            stringBuilder.append(strReadDate);
+                            String result = stringBuilder.toString();
+                            String strSW = result.substring(result.length() - 4);
+                            int pulSW = Integer.valueOf(strSW, 16);
+                            if (pulSW == 0x9000) {
+                                dealDate(result.substring(0, result.length() - 4), 2, 8);
+                            }
+                        } else if (mType == 9) {
+                            strReadDate = new String(buf_data, 0, buf_data.length);
+                            stringBuilder.append(strReadDate);
+                            String result = stringBuilder.toString();
+                            String strSW = result.substring(result.length() - 4);
+                            int pulSW = Integer.valueOf(strSW, 16);
+                            if (pulSW == 0x9000) {
+                                dealDate(result.substring(0, result.length() - 4), 2, 8);
+                            }
+                        } else {
+                            strReadDate = BJCWUtil.HexTostr(buf_data, buf_data.length);
+                            stringBuilder.append(strReadDate);
+                            Log.e("YJL", "strReadDate===" + strReadDate);
+                            if (null != strReadDate) {
+                                String result = stringBuilder.toString();
+                                String strSW = result.substring(result.length() - 4);
+                                int pulSW = Integer.valueOf(strSW, 16);
+                                boolean completion = PubUtils.judgeData(result);
+                                if (completion) {
+                                    if (pulSW == 0x9000) {
+                                        if (mType == 1) {
+                                            //接触卡
+                                            index++;
+                                            Log.e("YJL", "index===" + index);
+                                            if (index == 1) {
+                                                if (stringBuilder.toString().length() <= 30) {
+                                                    countError++;
+                                                    if (countError <= 4) {
+                                                        stringBuilder = new StringBuilder();
+                                                        index = 0;
+                                                        sendMsg(1);
+                                                    } else {
+                                                        index = 5;
+                                                        stringBuilder = new StringBuilder();
+                                                        sendMsg(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_CONTACT_6));
+                                                    }
                                                 } else {
-                                                    index = 5;
+                                                    sendMsg(BJCWUtil.StrToHex(PubUtils.sendApdu(PubUtils.sendApduIc((byte) 0x20, "00a4040007A0000003330101", 20), 20)));
                                                     stringBuilder = new StringBuilder();
-                                                    sendMsg(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_CONTACT_6));
                                                 }
-                                            } else {
-                                                sendMsg(BJCWUtil.StrToHex(PubUtils.sendApdu(PubUtils.sendApduIc((byte) 0x20, "00a4040007A0000003330101", 20), 20)));
-                                                stringBuilder = new StringBuilder();
-                                            }
-                                        } else if (index == 2) {
-                                            sendContact(2, result);
-                                        } else if (index == 3) {
-                                            sendContact(3, result);
-                                        } else if (index == 4) {
-                                            sendContact(4, result);
-                                        } else if (index == 5) {
-                                            sendContact(5, result);
-                                        } else if (index == 6) {
-                                            if (countError > 0) {
-                                                index = 0;
-                                                countError = 0;
-                                                dealDate("寻卡失败", 100);
-                                            } else {
-                                                Message msg = new Message();
-                                                msg.obj = SWdataBean.GetCardNum() + "\r\n" + SWdataBean.ICcardInfo;
-                                                msg.what = 1;
-                                                mHandler.sendMessage(msg);
-                                                stringBuilder = new StringBuilder();
-                                                countError = 0;
-                                                index = 0;
-                                            }
-                                        }
-                                    } else if (mType == 2) {
-                                        //非接触卡
-                                        index++;
-                                        Log.e("YJL", "index===" + index);
-                                        if (index == 1) {
-                                            if (stringBuilder.toString().length() <= 30) {
-                                                countError++;
-                                                if (countError <= 4) {
-                                                    stringBuilder = new StringBuilder();
+                                            } else if (index == 2) {
+                                                sendContact(2, result);
+                                            } else if (index == 3) {
+                                                sendContact(3, result);
+                                            } else if (index == 4) {
+                                                sendContact(4, result);
+                                            } else if (index == 5) {
+                                                sendContact(5, result);
+                                            } else if (index == 6) {
+                                                if (countError > 0) {
                                                     index = 0;
-                                                    sendMsg(2);
+                                                    countError = 0;
+                                                    dealDate("寻卡失败", 100);
                                                 } else {
-                                                    index = 3;
+                                                    Message msg = new Message();
+                                                    msg.obj = SWdataBean.GetCardNum() + "\r\n" + SWdataBean.ICcardInfo;
+                                                    msg.what = 1;
+                                                    mHandler.sendMessage(msg);
                                                     stringBuilder = new StringBuilder();
-                                                    sendMsg(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_NOCONTACT_4));
+                                                    countError = 0;
+                                                    index = 0;
                                                 }
-                                            } else {
-                                                countError=0;
-                                                sendMsg(BJCWUtil.StrToHex(PubUtils.sendApdu(PubUtils.sendApduIc((byte) 0x10, "00a4040007A0000003330101", 20), 20)));
-                                                stringBuilder = new StringBuilder();
                                             }
-                                        } else if (index == 2) {
-                                            sendNoContact(2, result);
-                                        } else if (index == 3) {
-                                            sendNoContact(3, result);
-                                        } else if (index == 4) {
-                                            if (countError > 0) {
-                                                index = 0;
-                                                countError = 0;
-                                                dealDate("寻卡失败", 100);
+                                        } else if (mType == 2) {
+                                            //非接触卡
+                                            index++;
+                                            Log.e("YJL", "index===" + index);
+                                            if (index == 1) {
+                                                if (stringBuilder.toString().length() <= 30) {
+                                                    countError++;
+                                                    if (countError <= 4) {
+                                                        stringBuilder = new StringBuilder();
+                                                        index = 0;
+                                                        sendMsg(2);
+                                                    } else {
+                                                        index = 3;
+                                                        stringBuilder = new StringBuilder();
+                                                        sendMsg(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_NOCONTACT_4));
+                                                    }
+                                                } else {
+                                                    countError = 0;
+                                                    sendMsg(BJCWUtil.StrToHex(PubUtils.sendApdu(PubUtils.sendApduIc((byte) 0x10, "00a4040007A0000003330101", 20), 20)));
+                                                    stringBuilder = new StringBuilder();
+                                                }
+                                            } else if (index == 2) {
+                                                sendNoContact(2, result);
+                                            } else if (index == 3) {
+                                                sendNoContact(3, result);
+                                            } else if (index == 4) {
+                                                if (countError > 0) {
+                                                    index = 0;
+                                                    countError = 0;
+                                                    dealDate("寻卡失败", 100);
+                                                } else {
+                                                    Message msg = new Message();
+                                                    msg.obj = SWdataBean.GetCardNum() + "\r\n" + SWdataBean.ICcardInfo;
+                                                    msg.what = 1;
+                                                    mHandler.sendMessage(msg);
+                                                    stringBuilder = new StringBuilder();
+                                                    countError = 0;
+                                                    index = 0;
+                                                }
+
+                                            }
+                                        } else if (mType == 3) {
+                                            //身份证
+                                            index++;
+                                            if (index == 1) {
+                                                sendMsg(BJCWUtil.StrToHex(PubUtils.sendApdu("FB810001000000", 5)));
+                                                dealDate(result, 1);
                                             } else {
-                                                Message msg = new Message();
-                                                msg.obj = SWdataBean.GetCardNum() + "\r\n" + SWdataBean.ICcardInfo;
-                                                msg.what = 1;
-                                                mHandler.sendMessage(msg);
                                                 stringBuilder = new StringBuilder();
                                                 countError = 0;
                                                 index = 0;
                                             }
-
-                                        }
-                                    } else if (mType == 3) {
-                                        //身份证
-                                        index++;
-                                        if (index == 1) {
-                                            sendMsg(BJCWUtil.StrToHex(PubUtils.sendApdu("FB810001000000", 5)));
-                                            dealDate(result, 1);
-                                        } else {
-                                            stringBuilder = new StringBuilder();
-                                            countError=0;
-                                            index = 0;
-                                        }
-                                    } else if (mType == 6) {
-                                        //密文
-                                        index++;
-                                        if (index == 1) {
-                                            sendMsg(BJCWUtil.StrToHex(PubUtils.sendApdu("FB802380000003010002", 20)));
-                                            stringBuilder = new StringBuilder();
-                                        } else {
-                                            dealDate(result, 1);
-                                            index = 0;
-                                        }
-                                    } else if (mType == 7) {
-                                        //指纹模块版本
-                                        index++;
-                                        if (index == 1) {
-                                            sendMsg(BJCWUtil.StrToHex(PubUtils.sendApdu("FB80350500000C000009020004090000000D03", 20)));
-                                            stringBuilder = new StringBuilder();
-                                        } else if (index == 2) {
-                                            //主界面弹框显示
-                                            sendMsg(BJCWUtil.StrToHex(PubUtils.sendApdu("00000000000000", 20)));
-                                            dealDate(result, 1, 8);
-                                            stringBuilder = new StringBuilder();
-                                        } else if (index == 3) {
-                                            stringBuilder = new StringBuilder();
-                                            index = 0;
-                                        }
-
-                                    } else if (mType == 8) {
-                                        //指纹模板
-                                        index++;
-                                        if (index == 1) {
-                                            sendMsg(BJCWUtil.StrToHex(PubUtils.sendApdu("FB80350500000D00000A0200051b000000001e03", 100)));
-                                            stringBuilder = new StringBuilder();
-                                        } else if (index == 2) {
-                                            //吐司提示第一次
-                                            sendMsg(BJCWUtil.StrToHex(PubUtils.sendApdu("FB80350500000D00000A0200051b000000011f03", 100)));
-                                            dealDate(result, 2, 7);
-                                            stringBuilder = new StringBuilder();
-                                        } else if (index == 3) {
-                                            //吐司提示第二次
-                                            sendMsg(BJCWUtil.StrToHex(PubUtils.sendApdu("FB80350500000D00000A0200051b000000021c03", 100)));
-                                            dealDate(result, 2, 7);
-                                            stringBuilder = new StringBuilder();
-                                        } else if (index == 4) {
-                                            //吐司提示第三次
-                                            sendMsg(BJCWUtil.StrToHex(PubUtils.sendApdu("FB80350500000C0000090200041c0300001B03", 100)));
-                                            dealDate(result, 2, 7);
-                                            stringBuilder = new StringBuilder();
-                                        } else if (index == 5) {
-                                            sendMsg(BJCWUtil.StrToHex(PubUtils.sendApdu("00000000000000", 100)));
+                                        } else if (mType == 6) {
+                                            //密文
+                                            index++;
+                                            if (index == 1) {
+                                                sendMsg(BJCWUtil.StrToHex(PubUtils.sendApdu("FB802380000003010002", 20)));
+                                                stringBuilder = new StringBuilder();
+                                            } else {
+                                                dealDate(result, 1);
+                                                index = 0;
+                                            }
+                                        } else if (mType == 7) {
+                                            //指纹模块版本
+                                            index++;
+                                            if (index == 1) {
+                                                sendMsg(BJCWUtil.StrToHex(PubUtils.sendApdu("FB80350500000C000009020004090000000D03", 20)));
+                                                stringBuilder = new StringBuilder();
+                                            } else if (index == 2) {
+                                                //主界面弹框显示
+                                                sendMsg(BJCWUtil.StrToHex(PubUtils.sendApdu("00000000000000", 20)));
+                                                dealDate(result, 1, 8);
+                                                stringBuilder = new StringBuilder();
+                                            } else if (index == 3) {
+                                                stringBuilder = new StringBuilder();
+                                                index = 0;
+                                            }
+                                        } else if (mType == 8) {
+                                            //指纹模板
+                                            index++;
+                                            if (index == 1) {
+                                                sendMsg(BJCWUtil.StrToHex(PubUtils.sendApdu("FB80350500000D00000A0200051b000000001e03", 100)));
+                                                stringBuilder = new StringBuilder();
+                                            } else if (index == 2) {
+                                                //吐司提示第一次
+                                                sendMsg(BJCWUtil.StrToHex(PubUtils.sendApdu("FB80350500000D00000A0200051b000000011f03", 100)));
+                                                dealDate(result, 2, 7);
+                                                stringBuilder = new StringBuilder();
+                                            } else if (index == 3) {
+                                                //吐司提示第二次
+                                                sendMsg(BJCWUtil.StrToHex(PubUtils.sendApdu("FB80350500000D00000A0200051b000000021c03", 100)));
+                                                dealDate(result, 2, 7);
+                                                stringBuilder = new StringBuilder();
+                                            } else if (index == 4) {
+                                                //吐司提示第三次
+                                                sendMsg(BJCWUtil.StrToHex(PubUtils.sendApdu("FB80350500000C0000090200041c0300001B03", 100)));
+                                                dealDate(result, 2, 7);
+                                                stringBuilder = new StringBuilder();
+                                            } else if (index == 5) {
+                                                sendMsg(BJCWUtil.StrToHex(PubUtils.sendApdu("00000000000000", 100)));
 //                                            主界面弹框显示
-                                            dealDate(result, 2, 8);
-                                            stringBuilder = new StringBuilder();
-                                        } else if (index == 6) {
-                                            stringBuilder = new StringBuilder();
-                                            index = 0;
-                                        }
-                                    } else if (mType == 9) {
-                                        //指纹特征
-                                        index++;
-                                        if (index == 1) {
-                                            sendMsg(BJCWUtil.StrToHex(PubUtils.sendApdu("FB80350500000C0000090200040C0100000903", 20)));
-                                            stringBuilder = new StringBuilder();
-                                        } else if (index == 2) {
-                                            sendMsg(BJCWUtil.StrToHex(PubUtils.sendApdu("00000000000000", 20)));
-                                            //主界面弹框显示
-                                            dealDate(result, 2, 8);
-                                            stringBuilder = new StringBuilder();
-                                        } else if (index == 3) {
-                                            stringBuilder = new StringBuilder();
-                                            index = 0;
+                                                dealDate(result, 2, 8);
+                                                stringBuilder = new StringBuilder();
+                                            } else if (index == 6) {
+                                                stringBuilder = new StringBuilder();
+                                                index = 0;
+                                            }
+                                        } else if (mType == 9) {
+                                            //指纹特征
+                                            index++;
+                                            if (index == 1) {
+                                                sendMsg(BJCWUtil.StrToHex(PubUtils.sendApdu("FB80350500000C0000090200040C0100000903", 20)));
+                                                stringBuilder = new StringBuilder();
+                                            } else if (index == 2) {
+                                                sendMsg(BJCWUtil.StrToHex(PubUtils.sendApdu("00000000000000", 20)));
+                                                //主界面弹框显示
+                                                dealDate(result, 2, 8);
+                                                stringBuilder = new StringBuilder();
+                                            } else if (index == 3) {
+                                                stringBuilder = new StringBuilder();
+                                                index = 0;
+                                            }
+                                        } else {
+                                            //其他
+                                            dealDate(result, 1);
                                         }
                                     } else {
-                                        //其他
-                                        dealDate(result, 1);
-                                    }
-                                } else {
-                                    Log.e("YJL", "mType===" + mType);
-                                    //数据完整错误码
-                                    if (mType == 1) {
-                                        //非接触
-                                        countError++;
-                                        if (countError <= 4) {
-                                            index = 0;
-                                            stringBuilder = new StringBuilder();
-                                            sendMsg(1);
-                                        } else {
-                                            index = 5;
-                                            stringBuilder = new StringBuilder();
-                                            sendMsg(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_CONTACT_6));
-                                        }
-                                    } else if (mType == 2) {
-                                        //非接触
-                                        countError++;
-                                        if (countError <= 4) {
-                                            index = 0;
-                                            stringBuilder = new StringBuilder();
-                                            sendMsg(2);
-                                        } else {
-                                            index = 3;
-                                            stringBuilder = new StringBuilder();
-                                            sendMsg(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_NOCONTACT_4));
-                                        }
+                                        Log.e("YJL", "mType===" + mType);
+                                        //数据完整错误码
+                                        if (mType == 1) {
+                                            //非接触
+                                            countError++;
+                                            if (countError <= 4) {
+                                                index = 0;
+                                                stringBuilder = new StringBuilder();
+                                                sendMsg(1);
+                                            } else {
+                                                index = 5;
+                                                stringBuilder = new StringBuilder();
+                                                sendMsg(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_CONTACT_6));
+                                            }
+                                        } else if (mType == 2) {
+                                            //非接触
+                                            countError++;
+                                            if (countError <= 4) {
+                                                index = 0;
+                                                stringBuilder = new StringBuilder();
+                                                sendMsg(2);
+                                            } else {
+                                                index = 3;
+                                                stringBuilder = new StringBuilder();
+                                                sendMsg(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_NOCONTACT_4));
+                                            }
 
-                                    } else if (mType == 3) {
-                                        //身份证超时
-                                        sendMsg(BJCWUtil.StrToHex(PubUtils.sendApdu("FB810001000000", 5)));
-                                        dealDate("" + pulSW, 2);
-                                        index = 1;
-                                        stringBuilder = new StringBuilder();
-                                    } else {
-                                        dealDate("" + pulSW, 2);
+                                        } else if (mType == 3) {
+                                            //身份证超时
+                                            sendMsg(BJCWUtil.StrToHex(PubUtils.sendApdu("FB810001000000", 5)));
+                                            dealDate("" + pulSW, 2);
+                                            index = 1;
+                                            stringBuilder = new StringBuilder();
+                                        } else {
+                                            dealDate("" + pulSW, 2);
+                                        }
                                     }
                                 }
                             }
@@ -431,7 +459,8 @@ public class SocketClient {
             String sv = new String(Ver);
             msg.obj = sv;
         } else {
-            msg.obj = strReply;
+//            msg.obj = strReply;
+            msg.obj = result;
         }
         mHandler.sendMessage(msg);
         stringBuilder = new StringBuilder();

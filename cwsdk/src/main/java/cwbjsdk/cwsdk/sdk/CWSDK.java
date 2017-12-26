@@ -174,41 +174,41 @@ public class CWSDK {
             int nCount = 0;
             LogOut("connectionDevice IN");
 //            if (device.getName().startsWith("CW") || device.getName().startsWith("BJ")) {
-                LogOut("正在连接安全 盒子设备");
-                if (bActionFound) {
-                    LogOut("设备已连接 ，无需再次连接");
-                    return;
-                }
-                if (mBluetoothAdapter.isDiscovering()) {
-                    mBluetoothAdapter.cancelDiscovery();
-                }
-                SWdataBean.SetCommId(DataBean.CMD_BLUTOOTH_STATE);
-                SWdataBean.SetImateName(device.getName());
-                strImateName = device.getName();
-                if (mConnenctionBlueTooth.getState() == ConnenctionBlueTooth.STATE_CONNECTED) {
-                    SWdataBean.SetBleState("已连接");
-                    IDataBeanCallback.postData(SWdataBean);
-                    return;
-                } else {
-                    mConnenctionBlueTooth.connect(device, true);
-                    bActionFound = true;
-                    while (nCount < 100) {
-                        try {
-                            if (mConnenctionBlueTooth.getState() == ConnenctionBlueTooth.STATE_CONNECTED) {
-                                SWdataBean.SetBleState("已连接");
-                                nCount = 0;
-                                break;
-                            } else {
-                                SWdataBean.SetImateName("");
-                                SWdataBean.SetBleState("未连接");
-                            }
-                            Thread.sleep(20 * nCount);
-                            nCount++;
-                        } catch (InterruptedException e) {
+            LogOut("正在连接安全 盒子设备");
+            if (bActionFound) {
+                LogOut("设备已连接 ，无需再次连接");
+                return;
+            }
+            if (mBluetoothAdapter.isDiscovering()) {
+                mBluetoothAdapter.cancelDiscovery();
+            }
+            SWdataBean.SetCommId(DataBean.CMD_BLUTOOTH_STATE);
+            SWdataBean.SetImateName(device.getName());
+            strImateName = device.getName();
+            if (mConnenctionBlueTooth.getState() == ConnenctionBlueTooth.STATE_CONNECTED) {
+                SWdataBean.SetBleState("已连接");
+                IDataBeanCallback.postData(SWdataBean);
+                return;
+            } else {
+                mConnenctionBlueTooth.connect(device, true);
+                bActionFound = true;
+                while (nCount < 100) {
+                    try {
+                        if (mConnenctionBlueTooth.getState() == ConnenctionBlueTooth.STATE_CONNECTED) {
+                            SWdataBean.SetBleState("已连接");
+                            nCount = 0;
+                            break;
+                        } else {
+                            SWdataBean.SetImateName("");
+                            SWdataBean.SetBleState("未连接");
                         }
+                        Thread.sleep(20 * nCount);
+                        nCount++;
+                    } catch (InterruptedException e) {
                     }
-                    IDataBeanCallback.postData(SWdataBean);
                 }
+                IDataBeanCallback.postData(SWdataBean);
+            }
 
 //            } else {
 //                LogOut("设备不符合连接要求！");
@@ -346,7 +346,7 @@ public class CWSDK {
             int i;
             LogOut("GetFprinterVerAsynTask IN");
             APDUReplyData szReply = new APDUReplyData();
-            int nRet = 0;
+           /* int nRet = 0;
             nRet = mConnectionBle.sendApdu("FB803400000000", nTime, szReply);
             nRet = mConnectionBle.sendApdu("FB80350500000C0000090200040C0100000903", nTime, szReply);
             if (nRet == 0x9000) {
@@ -357,7 +357,15 @@ public class CWSDK {
                 SendtoUIMessage("获取指纹版本错误", 7);
             }
             nRet = mConnectionBle.sendApdu("00000000000000", nTime, szReply);
-
+*/
+            int nRet = mConnectionBle.sendApduFinger("09", szReply);
+            if (nRet == 0x9000) {
+                String result = szReply.getRetData().toString();
+                String StrVer = result.substring(0, result.length() - 4);
+                SendtoUIMessage(StrVer, 8);
+            } else {
+                SendtoUIMessage("获取指纹模板错误", 7);
+            }
             return null;
         }
 
@@ -382,7 +390,7 @@ public class CWSDK {
             int i;
             LogOut("GetFprinterVerAsynTask IN");
             APDUReplyData szReply = new APDUReplyData();
-            int nRet = 0;
+          /*  int nRet = 0;
             nRet = mConnectionBle.sendApdu("FB803400000000", nTime, szReply);
             nRet = mConnectionBle.sendApdu("FB80350500000C000009020004090000000D03", nTime, szReply);
             if (nRet == 0x9000) {
@@ -397,7 +405,15 @@ public class CWSDK {
             } else {
                 SendtoUIMessage("获取指纹版本错误", 7);
             }
-            nRet = mConnectionBle.sendApdu("00000000000000", nTime, szReply);
+            nRet = mConnectionBle.sendApdu("00000000000000", nTime, szReply);*/
+            int nRet = mConnectionBle.sendApduFinger("08", szReply);
+            if (nRet == 0x9000) {
+                String result = szReply.getRetData().toString();
+                String StrVer = result.substring(0, result.length() - 4);
+                SendtoUIMessage(StrVer, 8);
+            } else {
+                SendtoUIMessage("获取指纹模板错误", 7);
+            }
             return null;
         }
     }
@@ -418,7 +434,7 @@ public class CWSDK {
 
 
             LogOut("GetFprinterAsynTask IN");
-            APDUReplyData szReply = new APDUReplyData();
+            /*APDUReplyData szReply = new APDUReplyData();
             int nRet = 0;
             nRet = mConnectionBle.sendApdu("FB803400000000", nTime, szReply);
 
@@ -459,9 +475,17 @@ public class CWSDK {
             } else {
                 SendtoUIMessage("获取指纹模板错误", 7);
             }
-
-
-            nRet = mConnectionBle.sendApdu("00000000000000", nTime, szReply);
+*/
+            APDUReplyData szReply = new APDUReplyData();
+            int nRet = mConnectionBle.sendApduFinger("10", szReply);
+            if (nRet == 0x9000) {
+                String result = szReply.getRetData().toString();
+                String StrVer = result.substring(0, result.length() - 4);
+                SendtoUIMessage(StrVer, 8);
+            } else {
+                SendtoUIMessage("获取指纹模板错误", 7);
+            }
+//            nRet = mConnectionBle.sendApdu("00000000000000", nTime, szReply);
             return null;
         }
     }
@@ -888,7 +912,7 @@ public class CWSDK {
 
         if (replay.length() > 4) {
             String strdata = replay.substring(0, replay.length() - 4);
-            Log.e("YJL","strdata=="+strdata);
+            Log.e("YJL", "strdata==" + strdata);
             pde.AnalysisDataElementsSubProcess_OneTime(strdata);
             pde.AnalysisDataElementsProcess();
             SWdataBean.ICcardInfo = pde.ResultInfoShow;
@@ -1037,7 +1061,7 @@ public class CWSDK {
             // initWithFormat:@"%s",szHexReadData];
             // mConnectionBle.sendApduIC:apduType apdu:strCmd replay:replay
             // sw:&sw timeOut:timeout];
-            Log.e("YJL","strCmd==="+strCmd);
+            Log.e("YJL", "strCmd===" + strCmd);
             mConnectionBle.sendApduIC(apduType, strCmd, timeout, szApduReply);
             sw = szApduReply.getSW();
             replay = szApduReply.getRetData();

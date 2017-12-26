@@ -28,7 +28,7 @@ public class ConnenctionBlueTooth {
     private ConnectThread mConnectThread;
     private ConnectedThread mConnectedThread;
     private int mState;
-
+    private boolean finger;
     // Constants that indicate the current connection state
     public static final int STATE_NONE = 0; // we're doing nothing
     public static final int STATE_LISTEN = 1; // now listening for incoming
@@ -63,6 +63,7 @@ public class ConnenctionBlueTooth {
 
 
     public int sendApduIC(byte apduType, String apdu, int time, APDUReplyData szReply) {
+        finger = false;
         int nLen = apdu.length() / 2;
         int cmdType = 0x6F;
         BJCWUtil.OutputLog("sendApduIC IN");
@@ -123,6 +124,7 @@ public class ConnenctionBlueTooth {
 
     // 发送数据
     public int sendApdu(String cmd, int time, APDUReplyData szReply) {
+        finger = false;
         int pulSW = 0;
 
         BJCWUtil.OutputLog("sendApdu IN");
@@ -277,7 +279,7 @@ public class ConnenctionBlueTooth {
                 strReply = mstrReplayString.substring(6, nLen - 4);// 4
                 strSW = mstrReplayString.substring(nLen - 4);
                 pulSW = Integer.valueOf(strSW, 16);
-                Log.e("YJL","length-==-="+strReply.length());
+                Log.e("YJL", "length-==-=" + strReply.length());
                 szReply.setRetData(strReply);
                 szReply.setSW(pulSW);
             }
@@ -392,6 +394,42 @@ public class ConnenctionBlueTooth {
             szReply.setSW(0x000C);
         }
         BJCWUtil.OutputLog(String.format("Reply:%s,SW:%s", strReply, strSW));
+        return szReply.getSW();
+    }
+
+    public int sendApduFinger(String cmd, APDUReplyData szReply) {
+        mstrReplayString = "";
+        mbGetReply = false;
+        finger = true;
+        int count = 0;
+        byte[] value = BJCWUtil.StrToHex(cmd);
+//        do {
+        write(value, 0, value.length);
+        while (!mbGetReply) {
+            if (null == mstrReplayString || !mstrReplayString.contains("9000")) {
+                count++;
+                continue;
+            }
+            if (null != mstrReplayString && mstrReplayString.contains("9000")) {
+                break;
+            }
+
+        }
+//        } while (count <= 6);
+        if (mState == STATE_NONE) {
+            BJCWUtil.OutputLog("关闭蓝牙");
+            return CONST_PARAM.RT_BLUETOOTH_FAILED;
+        }
+        if (mstrReplayString != null) {
+            int nLen = mstrReplayString.length();
+            String strSW = mstrReplayString.substring(nLen - 4);
+            int pulSW = Integer.valueOf(strSW, 16);
+            Log.e("YJL", "length-==-=" + mstrReplayString.length());
+            szReply.setRetData(mstrReplayString);
+            szReply.setSW(pulSW);
+        } else {
+            szReply.setSW(00);
+        }
         return szReply.getSW();
     }
 
@@ -721,78 +759,84 @@ public class ConnenctionBlueTooth {
                         for (int i = 0; i < bytes; i++) {
                             buf_data[i] = buffer[i];
                         }
-
-                        strReadDate = BJCWUtil.HexTostr(buf_data, buf_data.length);
-                        BJCWUtil.OutputLog("ConnectedThread************数据返回为：：：" + strReadDate);
-                        if (strReadDate.length() == 0) {
-                            nCount++;
-                            if (nCount < 10) {
-                                try {
-                                    sleep(100);
-                                } catch (InterruptedException e) {
-                                    // TODO Auto-generated catch block
-                                    e.printStackTrace();
-                                }
-                                BJCWUtil.OutputLog("ConnectedThread************数据返回为空");
-                                continue;
-                            }
-                            BJCWUtil.OutputLog("ConnectedThread************数据接收失败");
+                        if (finger) {
+                            strReadDate = new String(buf_data, 0, buf_data.length);
+                            BJCWUtil.OutputLog("ConnectedThread***************数据完整");
+                            mstrReplayString = strReadDate;
                             mbGetReply = true;
                         } else {
-                            nCount = 0;
-
-                            if (strReadDate.length() < 6) {
-                                mstrReplayString = mstrReplayString + strReadDate;
-                                BJCWUtil.OutputLog("ConnectedThread*******数据返回 长度小于6数据：" + mstrReplayString);
+                            strReadDate = BJCWUtil.HexTostr(buf_data, buf_data.length);
+                            BJCWUtil.OutputLog("ConnectedThread************数据返回为：：：" + strReadDate);
+                            if (strReadDate.length() == 0) {
                                 nCount++;
-                                if (nCount < 3) {
+                                if (nCount < 10) {
                                     try {
-                                        sleep(10);
+                                        sleep(100);
                                     } catch (InterruptedException e) {
                                         // TODO Auto-generated catch block
                                         e.printStackTrace();
                                     }
+                                    BJCWUtil.OutputLog("ConnectedThread************数据返回为空");
+                                    continue;
                                 }
-                                continue;
-                            } else {
-                                mstrReplayString = mstrReplayString + strReadDate;
-                                BJCWUtil.OutputLog("ConnectedThread*******数据返回 长度大于6数据：" + mstrReplayString);
-                            }
-
-                            if (nCount > 0) {
-                                if (mstrReplayString.length() < 6) {
-                                    BJCWUtil.OutputLog("ConnectedThread*******数据不完整" + mstrReplayString);
-                                    mbGetReply = true;
-                                }
-                            }
-                            BJCWUtil.OutputLog("ConnectedThread*******mstrReplayString 数据：" + mstrReplayString);
-                            if (mstrReplayString.equals("00026984")) {
-                                BJCWUtil.OutputLog("ConnectedThread***************6984 数据返回错误");
-                                // mstrReplayString = strReadDate;
+                                BJCWUtil.OutputLog("ConnectedThread************数据接收失败");
                                 mbGetReply = true;
                             } else {
-                                // null00026984 连上有时候返回
-                                if (!mstrReplayString.startsWith("null")) {
-                                    String strReplyLen = mstrReplayString.substring(2, 6);// strReadDate
-                                    int nstrReplyLen = Integer.parseInt(strReplyLen, 16);
-                                    Log.e("YJL", "nstrReplyLen==" + nstrReplyLen);
-                                    int nReplyLen = mstrReplayString.length() - 6;// strReadDate
-                                    Log.e("YJL", "nReplyLen==" + nReplyLen);
-                                    if (nstrReplyLen * 2 != nReplyLen) {
+                                nCount = 0;
 
-                                        BJCWUtil.OutputLog("ConnectedThread***************数据不完整");
-                                        mbGetReply = false;
-                                        // mstrReplayString = mstrReplayString+
-                                        // strReadDate;
-                                    } else {
-                                        BJCWUtil.OutputLog("ConnectedThread***************数据完整");
-                                        // mstrReplayString = strReadDate;
+                                if (strReadDate.length() < 6) {
+                                    mstrReplayString = mstrReplayString + strReadDate;
+                                    BJCWUtil.OutputLog("ConnectedThread*******数据返回 长度小于6数据：" + mstrReplayString);
+                                    nCount++;
+                                    if (nCount < 3) {
+                                        try {
+                                            sleep(10);
+                                        } catch (InterruptedException e) {
+                                            // TODO Auto-generated catch block
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                    continue;
+                                } else {
+                                    mstrReplayString = mstrReplayString + strReadDate;
+                                    BJCWUtil.OutputLog("ConnectedThread*******数据返回 长度大于6数据：" + mstrReplayString);
+                                }
+
+                                if (nCount > 0) {
+                                    if (mstrReplayString.length() < 6) {
+                                        BJCWUtil.OutputLog("ConnectedThread*******数据不完整" + mstrReplayString);
                                         mbGetReply = true;
                                     }
                                 }
+                                BJCWUtil.OutputLog("ConnectedThread*******mstrReplayString 数据：" + mstrReplayString);
+                                if (mstrReplayString.equals("00026984")) {
+                                    BJCWUtil.OutputLog("ConnectedThread***************6984 数据返回错误");
+                                    // mstrReplayString = strReadDate;
+                                    mbGetReply = true;
+                                } else {
+                                    // null00026984 连上有时候返回
+                                    if (!mstrReplayString.startsWith("null")) {
+                                        String strReplyLen = mstrReplayString.substring(2, 6);// strReadDate
+                                        int nstrReplyLen = Integer.parseInt(strReplyLen, 16);
+                                        Log.e("YJL", "nstrReplyLen==" + nstrReplyLen);
+                                        int nReplyLen = mstrReplayString.length() - 6;// strReadDate
+                                        Log.e("YJL", "nReplyLen==" + nReplyLen);
+                                        if (nstrReplyLen * 2 != nReplyLen) {
+
+                                            BJCWUtil.OutputLog("ConnectedThread***************数据不完整");
+                                            mbGetReply = false;
+                                            // mstrReplayString = mstrReplayString+
+                                            // strReadDate;
+                                        } else {
+                                            BJCWUtil.OutputLog("ConnectedThread***************数据完整");
+                                            // mstrReplayString = strReadDate;
+                                            mbGetReply = true;
+                                        }
+                                    }
+
+                                }
 
                             }
-
                         }
 
                         BJCWUtil.OutputLog("ConnectedThread*********数据" + mstrReplayString);

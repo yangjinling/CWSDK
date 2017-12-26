@@ -106,15 +106,18 @@ public class BluetoothGattUtil extends BluetoothGattCallback {
         } else if (type == 7) {
             //7:指纹模块版本
             mType = 7;
-            value = BJCWUtil.StrToHex(PubUtils.sendApdu("FB803400000000", 20));
+//            value = BJCWUtil.StrToHex(PubUtils.sendApdu("FB803400000000", 20));
+            value = BJCWUtil.StrToHex("08");
         } else if (type == 8) {
             //8:指纹模块获取
             mType = 8;
-            value = BJCWUtil.StrToHex(PubUtils.sendApdu("FB803400000000", 20));
+//            value = BJCWUtil.StrToHex(PubUtils.sendApdu("FB803400000000", 20));
+            value = BJCWUtil.StrToHex("10");
         } else if (type == 9) {
             //9:指纹特征获取
             mType = 9;
-            value = BJCWUtil.StrToHex(PubUtils.sendApdu("FB803400000000", 20));
+//            value = BJCWUtil.StrToHex(PubUtils.sendApdu("FB803400000000", 20));
+            value = BJCWUtil.StrToHex("09");
         }
         BluetoothGattCharacteristic mRxChar = null;
         BluetoothGattService mRxService;
@@ -351,212 +354,238 @@ public class BluetoothGattUtil extends BluetoothGattCallback {
         for (int i = 0; i < bytes; i++) {
             buf_data[i] = buffer[i];
         }
-        String strReadDate = BJCWUtil.HexTostr(buf_data, buf_data.length);
-        Log.e("YJL", "strReadDate===" + strReadDate);
-        builder.append(strReadDate);
-        String result = builder.toString();
-        Log.e("YJL", "builder===" + builder.toString().length());
-        int pulSW = Integer.valueOf(builder.toString().substring(builder.toString().length() - 4), 16);
-        boolean completion = PubUtils.judgeData(result);
-        if (completion) {
+        if (mType == 7) {
+            String strReadDate = new String(buffer, 0, buffer.length);
+            Log.e("YJL", "strReadDate==" + strReadDate);
+            builder.append(strReadDate);
+            String result = builder.toString();
+            int pulSW = Integer.valueOf(result.substring(result.length() - 4), 16);
             if (pulSW == 0x9000) {
-                if (mType == 1) {
-                    //接触
-                    index++;
-                    Log.e("YJL", "index===" + index);
-                    if (index == 1) {
-                        if (builder.toString().length() <= 30) {
-                            errorcount++;
-                            if (errorcount <= 4) {
-                                builder = new StringBuilder();
-                                index = 0;
-                                writeRXCharacteristic(1);
+                sendData(true, result.substring(0,result.length() - 4), 2);
+            }
+        } else if (mType == 8) {
+            String strReadDate = new String(buffer, 0, buffer.length);
+            builder.append(strReadDate);
+            String result = builder.toString();
+            int pulSW = Integer.valueOf(result.substring(result.length() - 4), 16);
+            if (pulSW == 0x9000) {
+                sendData(true, result.substring(0,result.length() - 4), 2);
+            }
+        } else if (mType == 9) {
+            String strReadDate = new String(buffer, 0, buffer.length);
+            builder.append(strReadDate);
+            String result = builder.toString();
+            int pulSW = Integer.valueOf(result.substring(result.length() - 4), 16);
+            if (pulSW == 0x9000) {
+                sendData(true, result.substring(0,result.length() - 4), 2);
+            }
+        } else {
+            String strReadDate = BJCWUtil.HexTostr(buf_data, buf_data.length);
+            Log.e("YJL", "strReadDate===" + strReadDate);
+            builder.append(strReadDate);
+            String result = builder.toString();
+            Log.e("YJL", "builder===" + builder.toString().length());
+            int pulSW = Integer.valueOf(builder.toString().substring(builder.toString().length() - 4), 16);
+            boolean completion = PubUtils.judgeData(result);
+            if (completion) {
+                if (pulSW == 0x9000) {
+                    if (mType == 1) {
+                        //接触
+                        index++;
+                        Log.e("YJL", "index===" + index);
+                        if (index == 1) {
+                            if (builder.toString().length() <= 30) {
+                                errorcount++;
+                                if (errorcount <= 4) {
+                                    builder = new StringBuilder();
+                                    index = 0;
+                                    writeRXCharacteristic(1);
+                                } else {
+                                    index = 5;
+                                    builder = new StringBuilder();
+                                    writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_CONTACT_6));
+                                }
                             } else {
-                                index = 5;
+                                errorcount = 0;
+                                writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.sendApdu(PubUtils.sendApduIc((byte) 0x20, "00a4040007A0000003330101", 20), 20)));
                                 builder = new StringBuilder();
-                                writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_CONTACT_6));
                             }
-                        } else {
-                            errorcount=0;
-                            writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.sendApdu(PubUtils.sendApduIc((byte) 0x20, "00a4040007A0000003330101", 20), 20)));
-                            builder = new StringBuilder();
-                        }
-                    } else if (index == 2) {
-                        sendContact(2, result);
-                    } else if (index == 3) {
-                        sendContact(3, result);
-                    } else if (index == 4) {
-                        sendContact(4, result);
-                    } else if (index == 5) {
-                        sendContact(5, result);
-                    } else if (index == 6) {
-                        if (errorcount > 0) {
-                            builder = new StringBuilder();
-                            errorcount = 0;
-                            index = 0;
-                            mCallBack.getDataFail(100);
-                        } else {
-                            errorcount = 0;
-                            mCallBack.dealData(0, SWdataBean.GetCardNum() + "\r\n" + SWdataBean.ICcardInfo);
-                            builder = new StringBuilder();
-                            errorcount = 0;
-                            index = 0;
-                        }
-                    }
-                } else if (mType == 2) {
-                    //非接
-                    index++;
-                    Log.e("YJL", "index===" + index);
-                    if (index == 1) {
-                        if (builder.toString().length() <= 30) {
-                            errorcount++;
-                            if (errorcount <= 6) {
+                        } else if (index == 2) {
+                            sendContact(2, result);
+                        } else if (index == 3) {
+                            sendContact(3, result);
+                        } else if (index == 4) {
+                            sendContact(4, result);
+                        } else if (index == 5) {
+                            sendContact(5, result);
+                        } else if (index == 6) {
+                            if (errorcount > 0) {
                                 builder = new StringBuilder();
+                                errorcount = 0;
                                 index = 0;
-                                writeRXCharacteristic(2);
+                                mCallBack.getDataFail(100);
                             } else {
-                                index = 3;
+                                errorcount = 0;
+                                mCallBack.dealData(0, SWdataBean.GetCardNum() + "\r\n" + SWdataBean.ICcardInfo);
                                 builder = new StringBuilder();
-                                writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_NOCONTACT_4));
+                                errorcount = 0;
+                                index = 0;
                             }
-                        } else {
-                            errorcount=0;
-                            writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.sendApdu(PubUtils.sendApduIc((byte) 0x10, "00a4040007A0000003330101", 20), 20)));
-                            builder = new StringBuilder();
                         }
-                    } else if (index == 2) {
-                        sendNoContact(2, result);
-                    } else if (index == 3) {
-                        sendNoContact(3, result);
-                    } else if (index == 4) {
-                        if (errorcount > 0) {
+                    } else if (mType == 2) {
+                        //非接
+                        index++;
+                        Log.e("YJL", "index===" + index);
+                        if (index == 1) {
+                            if (builder.toString().length() <= 30) {
+                                errorcount++;
+                                if (errorcount <= 6) {
+                                    builder = new StringBuilder();
+                                    index = 0;
+                                    writeRXCharacteristic(2);
+                                } else {
+                                    index = 3;
+                                    builder = new StringBuilder();
+                                    writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_NOCONTACT_4));
+                                }
+                            } else {
+                                errorcount = 0;
+                                writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.sendApdu(PubUtils.sendApduIc((byte) 0x10, "00a4040007A0000003330101", 20), 20)));
+                                builder = new StringBuilder();
+                            }
+                        } else if (index == 2) {
+                            sendNoContact(2, result);
+                        } else if (index == 3) {
+                            sendNoContact(3, result);
+                        } else if (index == 4) {
+                            if (errorcount > 0) {
+                                builder = new StringBuilder();
+                                errorcount = 0;
+                                index = 0;
+                                mCallBack.getDataFail(100);
+                            } else {
+                                mCallBack.dealData(0, SWdataBean.GetCardNum() + "\r\n" + SWdataBean.ICcardInfo);
+                                builder = new StringBuilder();
+                                errorcount = 0;
+                                index = 0;
+                            }
+                        }
+                    } else if (mType == 3) {
+                        //身份证
+                        index++;
+                        if (index == 1) {
+                            writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.sendApdu("FB810001000000", 5)));
+                            sendData(completion, result);
+                        } else {
                             builder = new StringBuilder();
                             errorcount = 0;
                             index = 0;
-                            mCallBack.getDataFail(100);
-                        } else {
-                            mCallBack.dealData(0, SWdataBean.GetCardNum() + "\r\n" + SWdataBean.ICcardInfo);
+                        }
+                    } else if (mType == 6) {
+                        //密文
+                        index++;
+                        if (index == 1) {
+                            writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.sendApdu("FB802380000003010002", 20)));
                             builder = new StringBuilder();
-                            errorcount = 0;
+                        } else {
+                            sendData(completion, result);
                             index = 0;
                         }
+                    } else if (mType == 7) {
+                        //指纹模块版本
+                        index++;
+                        if (index == 1) {
+                            writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.sendApdu("FB80350500000C000009020004090000000D03", 20)));
+                            builder = new StringBuilder();
+                        } else if (index == 2) {
+                            writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.sendApdu("00000000000000", 20)));
+                            sendData(completion, result, 1);
+                        } else if (index == 3) {
+                            builder = new StringBuilder();
+                            index = 0;
+                        }
+
+                    } else if (mType == 8) {
+                        //指纹模板
+                        index++;
+                        if (index == 1) {
+                            writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.sendApdu("FB80350500000D00000A0200051b000000001e03", 100)));
+                            builder = new StringBuilder();
+                        } else if (index == 2) {
+                            writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.sendApdu("FB80350500000D00000A0200051b000000011f03", 100)));
+                            sendData(completion, result, 3);
+                        } else if (index == 3) {
+                            writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.sendApdu("FB80350500000D00000A0200051b000000021c03", 100)));
+                            sendData(completion, result, 3);
+                            builder = new StringBuilder();
+                        } else if (index == 4) {
+                            writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.sendApdu("FB80350500000C0000090200041c0300001B03", 100)));
+                            sendData(completion, result, 3);
+                            builder = new StringBuilder();
+                        } else if (index == 5) {
+                            writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.sendApdu("00000000000000", 100)));
+                            sendData(completion, result, 2);
+                            builder = new StringBuilder();
+                        } else if (index == 6) {
+                            builder = new StringBuilder();
+                            index = 0;
+                        }
+                    } else if (mType == 9) {
+                        //指纹特征
+                        index++;
+                        if (index == 1) {
+                            writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.sendApdu("FB80350500000C0000090200040C0100000903", 20)));
+                            builder = new StringBuilder();
+                        } else if (index == 2) {
+                            writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.sendApdu("00000000000000", 20)));
+                            sendData(completion, result, 2);
+                        } else if (index == 3) {
+                            builder = new StringBuilder();
+                            index = 0;
+                        }
+                    } else {
+                        //其他情况
+                        sendData(completion, result);
                     }
-                } else if (mType == 3) {
-                    //身份证
-                    index++;
-                    if (index == 1) {
+                } else {
+                    if (mType == 1) {
+                        //接触
+                        errorcount++;
+                        if (errorcount <= 4) {
+                            index = 0;
+                            builder = new StringBuilder();
+                            writeRXCharacteristic(1);
+                        } else {
+                            index = 5;
+                            builder = new StringBuilder();
+                            writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_CONTACT_6));
+                        }
+                    } else if (mType == 2) {
+                        //非接触
+                        errorcount++;
+                        if (errorcount <= 4) {
+                            index = 0;
+                            builder = new StringBuilder();
+                            writeRXCharacteristic(2);
+                        } else {
+                            index = 3;
+                            builder = new StringBuilder();
+                            writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_NOCONTACT_4));
+                        }
+
+                    } else if (mType == 3) {
+                        //超时
                         writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.sendApdu("FB810001000000", 5)));
-                        sendData(completion, result);
-                    } else {
-                        builder = new StringBuilder();
-                        errorcount=0;
-                        index = 0;
-                    }
-                } else if (mType == 6) {
-                    //密文
-                    index++;
-                    if (index == 1) {
-                        writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.sendApdu("FB802380000003010002", 20)));
+                        mCallBack.getDataFail(pulSW);
+                        index = 1;
                         builder = new StringBuilder();
                     } else {
-                        sendData(completion, result);
-                        index = 0;
+                        mCallBack.getDataFail(pulSW);
+                        builder = new StringBuilder();
                     }
-                } else if (mType == 7) {
-                    //指纹模块版本
-                    index++;
-                    if (index == 1) {
-                        writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.sendApdu("FB80350500000C000009020004090000000D03", 20)));
-                        builder = new StringBuilder();
-                    } else if (index == 2) {
-                        writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.sendApdu("00000000000000", 20)));
-                        sendData(completion, result, 1);
-                    } else if (index == 3) {
-                        builder = new StringBuilder();
-                        index = 0;
-                    }
-
-                } else if (mType == 8) {
-                    //指纹模板
-                    index++;
-                    if (index == 1) {
-                        writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.sendApdu("FB80350500000D00000A0200051b000000001e03", 100)));
-                        builder = new StringBuilder();
-                    } else if (index == 2) {
-                        writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.sendApdu("FB80350500000D00000A0200051b000000011f03", 100)));
-                        sendData(completion, result, 3);
-                    } else if (index == 3) {
-                        writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.sendApdu("FB80350500000D00000A0200051b000000021c03", 100)));
-                        sendData(completion, result, 3);
-                        builder = new StringBuilder();
-                    } else if (index == 4) {
-                        writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.sendApdu("FB80350500000C0000090200041c0300001B03", 100)));
-                        sendData(completion, result, 3);
-                        builder = new StringBuilder();
-                    } else if (index == 5) {
-                        writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.sendApdu("00000000000000", 100)));
-                        sendData(completion, result, 2);
-                        builder = new StringBuilder();
-                    } else if (index == 6) {
-                        builder = new StringBuilder();
-                        index = 0;
-                    }
-                } else if (mType == 9) {
-                    //指纹特征
-                    index++;
-                    if (index == 1) {
-                        writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.sendApdu("FB80350500000C0000090200040C0100000903", 20)));
-                        builder = new StringBuilder();
-                    } else if (index == 2) {
-                        writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.sendApdu("00000000000000", 20)));
-                        sendData(completion, result, 2);
-                    } else if (index == 3) {
-                        builder = new StringBuilder();
-                        index = 0;
-                    }
-                } else {
-                    //其他情况
-                    sendData(completion, result);
-                }
-            } else {
-                if (mType == 1) {
-                    //接触
-                    errorcount++;
-                    if (errorcount <= 4) {
-                        index = 0;
-                        builder = new StringBuilder();
-                        writeRXCharacteristic(1);
-                    } else {
-                        index = 5;
-                        builder = new StringBuilder();
-                        writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_CONTACT_6));
-                    }
-                } else if (mType == 2) {
-                    //非接触
-                    errorcount++;
-                    if (errorcount <= 4) {
-                        index = 0;
-                        builder = new StringBuilder();
-                        writeRXCharacteristic(2);
-                    } else {
-                        index = 3;
-                        builder = new StringBuilder();
-                        writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_NOCONTACT_4));
-                    }
-
-                } else if (mType == 3) {
-                    //超时
-                    writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.sendApdu("FB810001000000", 5)));
-                    mCallBack.getDataFail(pulSW);
-                    index = 1;
-                    builder = new StringBuilder();
-                } else {
-                    mCallBack.getDataFail(pulSW);
-                    builder = new StringBuilder();
                 }
             }
         }
-
     }
 
 
@@ -601,7 +630,8 @@ public class BluetoothGattUtil extends BluetoothGattCallback {
 
     private void sendData(boolean completion, String message, int type) {
         if (completion) {
-            String strReply = message.substring(6, message.length() - 4);// 4
+//            String strReply = message.substring(6, message.length() - 4);// 4
+            String strReply = message.substring(0, message.length());
             if (type == 1) {
                 BJCWUtil.OutputLog("ConnectedThread***************数据完整");
                 String StrVer = strReply.toString();
@@ -615,7 +645,7 @@ public class BluetoothGattUtil extends BluetoothGattCallback {
                 mCallBack.dealData(0, sv);
             } else if (type == 2) {
                 //展示
-                mCallBack.dealData(0, strReply);
+                mCallBack.dealData(0, message);
             } else if (type == 3) {
                 //吐司
                 mCallBack.dealData(1, strReply);
@@ -660,7 +690,7 @@ public class BluetoothGattUtil extends BluetoothGattCallback {
         if (index == 2) {
             String strReply = result.substring(26, result.length() - 4);// 4
             if (strReply.length() > 26) {
-                errorcount=0;
+                errorcount = 0;
                 PbocDataElementsClass pde = new PbocDataElementsClass();
                 String strdata = strReply.substring(0, strReply.length() - 4);
                 Log.e("YJL", "strdata==" + strdata);
@@ -680,7 +710,7 @@ public class BluetoothGattUtil extends BluetoothGattCallback {
             } else {
                 //100上电寻卡失败
                 errorcount++;
-                if (errorcount <8) {
+                if (errorcount < 8) {
                     this.index = 0;
                     builder = new StringBuilder();
                     writeRXCharacteristic(2);
@@ -735,7 +765,7 @@ public class BluetoothGattUtil extends BluetoothGattCallback {
                     writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_CONTACT_6));
                 }
             } else {
-                errorcount=0;
+                errorcount = 0;
                 String szSW = strReply.substring(strReply.length() - 4);
                 byte[] szASW = new byte[szSW.length() / 2];
                 BJCWUtil.HexToAsc(szASW, szSW.getBytes(), szSW.getBytes().length);
@@ -765,7 +795,7 @@ public class BluetoothGattUtil extends BluetoothGattCallback {
         } else if (index == 3) {
             String strReply = result.substring(26, result.length() - 4);// 4
             if (strReply.length() > 26) {
-                errorcount=0;
+                errorcount = 0;
                 PbocDataElementsClass pde = new PbocDataElementsClass();
                 String strdata = strReply.substring(0, strReply.length() - 4);
                 Log.e("YJL", "strdata==" + strdata);
@@ -803,7 +833,7 @@ public class BluetoothGattUtil extends BluetoothGattCallback {
             byte[] szASW = new byte[szSW.length() / 2];
             BJCWUtil.HexToAsc(szASW, szSW.getBytes(), szSW.getBytes().length);
             if (szASW[0] == 0x6C) {
-                errorcount=0;
+                errorcount = 0;
                 // memcpy(ReadRecordFor6C, ReadRecord, 4);
                 System.arraycopy(ReadRecord, 0, ReadRecordFor6C, 0, 4);
                 Log.e("YJL", "icResetCard 14");
@@ -843,7 +873,7 @@ public class BluetoothGattUtil extends BluetoothGattCallback {
                     writeRXCharacteristic(BJCWUtil.StrToHex(PubUtils.COMMAND_IC_CONTACT_6));
                 }
             } else {
-                errorcount=0;
+                errorcount = 0;
                 String results = PubUtils.getCardNum(strReply);
                 Log.e("YJL", "卡号" + results);
                 errorcount = 0;
