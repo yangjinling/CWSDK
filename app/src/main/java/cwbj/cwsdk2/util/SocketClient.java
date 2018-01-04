@@ -158,6 +158,8 @@ public class SocketClient {
                             int pulSW = Integer.valueOf(strSW, 16);
                             if (pulSW == 0x9000) {
                                 dealDate(result.substring(0, result.length() - 4), 2, 8);
+                            } else {
+                                dealDate("指纹数据获取失败", 2, 7);
                             }
                         } else if (mType == 8) {
                             strReadDate = new String(buf_data, 0, buf_data.length);
@@ -167,6 +169,8 @@ public class SocketClient {
                             int pulSW = Integer.valueOf(strSW, 16);
                             if (pulSW == 0x9000) {
                                 dealDate(result.substring(0, result.length() - 4), 2, 8);
+                            } else {
+                                dealDate("指纹数据获取失败", 2, 7);
                             }
                         } else if (mType == 9) {
                             strReadDate = new String(buf_data, 0, buf_data.length);
@@ -176,6 +180,19 @@ public class SocketClient {
                             int pulSW = Integer.valueOf(strSW, 16);
                             if (pulSW == 0x9000) {
                                 dealDate(result.substring(0, result.length() - 4), 2, 8);
+                            } else {
+                                dealDate("指纹数据获取失败", 2, 7);
+                            }
+                        } else if (mType == 10) {
+                            strReadDate = new String(buf_data, 0, buf_data.length);
+                            stringBuilder.append(strReadDate);
+                            String result = stringBuilder.toString();
+                            String strSW = result.substring(result.length() - 4);
+                            int pulSW = Integer.valueOf(strSW, 16);
+                            if (pulSW == 0x9000) {
+                                dealDate(result.substring(0, result.length() - 4), 2, 8);
+                            } else {
+                                dealDate("签名失败", 2, 7);
                             }
                         } else {
                             strReadDate = BJCWUtil.HexTostr(buf_data, buf_data.length);
@@ -531,15 +548,18 @@ public class SocketClient {
         } else if (type == 7) {
             //7:指纹模块版本
             mType = 7;
-            value = BJCWUtil.StrToHex(PubUtils.sendApdu("FB803400000000", 20));
+            value = BJCWUtil.StrToHex(/*PubUtils.sendApdu("FB803400000000", 20)*/"08");
         } else if (type == 8) {
             //8:指纹模块获取
             mType = 8;
-            value = BJCWUtil.StrToHex(PubUtils.sendApdu("FB803400000000", 20));
+            value = BJCWUtil.StrToHex(/*PubUtils.sendApdu("FB803400000000", 20)*/"10");
         } else if (type == 9) {
             //9:指纹特征获取
             mType = 9;
-            value = BJCWUtil.StrToHex(PubUtils.sendApdu("FB803400000000", 20));
+            value = BJCWUtil.StrToHex(/*PubUtils.sendApdu("FB803400000000", 20)*/"09");
+        } else if (type == 10) {
+            mType = 10;
+            value = BJCWUtil.StrToHex("11");
         }
         if (r != null)
             r.write(value);

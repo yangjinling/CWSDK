@@ -30,7 +30,7 @@
 
     <item
         android:id="@+id/action_Fprinter"
-       android:orderInCategory="100"
+        android:orderInCategory="100"
         android:title="指纹数据读取"
         app:showAsAction="never" />
 
@@ -46,6 +46,10 @@
         android:orderInCategory="100"
         android:title="键盘输入PIN"
         app:showAsAction="never" />
-
+    <item
+        android:id="@+id/action_sign"
+        android:orderInCategory="100"
+        android:title="签名"
+        app:showAsAction="never" />
 
 </menu>

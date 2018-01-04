@@ -91,6 +91,9 @@ public class KeyPadActivity extends Activity {
                     prograssBar.setVisibility(View.INVISIBLE);
                     tv2.setText(msg.obj.toString().split(";")[0]);
                     tv3.setText(msg.obj.toString().split(";")[1]);
+                } else  if (msg.what == 0x7) {
+                    prograssBar.setVisibility(View.INVISIBLE);
+                    Toast.makeText(KeyPadActivity.this, msg.obj.toString(), Toast.LENGTH_SHORT).show();
                 }
 
             }
@@ -132,7 +135,7 @@ public class KeyPadActivity extends Activity {
             client = new SocketClient();
             //服务端的IP地址和端口号
 //                    client.clintValue(getApplicationContext(), "192.168.0.48", 9999);
-            client.clintValue(getApplicationContext(),PubUtils.ip, 9999, wifiHandler);
+            client.clintValue(getApplicationContext(), PubUtils.ip, 9999, wifiHandler);
             //开启客户端接收消息线程
             client.openClientThread();
         } else {

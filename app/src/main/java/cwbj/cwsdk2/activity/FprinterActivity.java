@@ -86,7 +86,7 @@ public class FprinterActivity extends Activity {
                     //AlertDialog.Builder builder=new AlertDialog.Builder(this);
                     builder.setTitle("指纹数据返回");//设置标题
                     //builder.setIcon(R.drawable);//设置图标
-                    builder.setMessage(msg.obj.toString());//
+                    builder.setMessage(msg.obj.toString().substring(3));//
                     builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface arg0, int arg1) {

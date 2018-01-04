@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         String url = editText.getText().toString();
-                        PrefUtils.setString(MainActivity.this, "URL",url);
+                        PrefUtils.setString(MainActivity.this, "URL", url);
                         PubUtils.ip = url;
                     }
                 }).setPositiveButton("取消", new DialogInterface.OnClickListener() {
@@ -227,6 +227,24 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 if ("已配对".equals(et3.getText().toString())) {
                     Intent intent = new Intent(MainActivity.this, KeyPadActivity.class);
+                    intent.putExtra("MAC", SelecetedMACStr);
+                    startActivity(intent);
+                } else if (TextUtils.isEmpty(et3.getText().toString())) {
+                    Toast.makeText(this, "请去扫描选择蓝牙设备", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "请去设置中进行蓝牙配对", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+        if (id == R.id.action_sign) {
+            /*签名*/
+            if (PubUtils.isWifi) {
+                Intent intent = new Intent(MainActivity.this, SignActivity.class);
+                intent.putExtra("MAC", SelecetedMACStr);
+                startActivity(intent);
+            } else {
+                if ("已配对".equals(et3.getText().toString())) {
+                    Intent intent = new Intent(MainActivity.this, SignActivity.class);
                     intent.putExtra("MAC", SelecetedMACStr);
                     startActivity(intent);
                 } else if (TextUtils.isEmpty(et3.getText().toString())) {

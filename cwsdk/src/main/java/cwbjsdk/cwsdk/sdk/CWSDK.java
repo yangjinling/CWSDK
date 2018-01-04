@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.sqlite.SQLiteDatabaseLockedException;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
@@ -254,20 +255,19 @@ public class CWSDK {
                 if (bCtrlMode == 0) {
                     SendtoUIMessage(StrVer, 10);
                 } else {
-
                     int[] cipher = smscala.SMS4ValueToIntArray(StrVer);
                     int[] plain1 = smscala.decrypt(cipher, key);
                     String strplain = smscala.SMS4ValueToString(plain1);
                     SendtoUIMessage(StrVer + ";" + strplain, 0x11);
                 }
+            } else if (nRet == 0x6985) {
+                SendtoUIMessage("取消按键", 7);
             } else {
                 SendtoUIMessage("键盘输入失败", 7);
             }
-
-
             return null;
-
         }
+
     }
 
     /*获取磁条卡信息*/
@@ -490,6 +490,42 @@ public class CWSDK {
         }
     }
 
+
+    /*签名*/
+    private int type;
+
+    public void sign(int type) {
+        LogOut("GetFprinter IN");
+        this.type = type;
+        bIsCancleApdu = true;
+        new SignAsynTask().execute("");
+    }
+
+
+    private class SignAsynTask extends AsyncTask<String, Void, Integer> {
+
+        @Override
+        protected Integer doInBackground(String... params) {
+            LogOut("Sign IN");
+            APDUReplyData szReply = new APDUReplyData();
+            if (type == 0) {
+                mConnectionBle.sendApduSign("11", szReply, mhandler);
+            } else {
+                mConnectionBle.sendApduSign("12", szReply, mhandler);
+            }
+//            Log.e("YJL", "nRet==" + nRet);
+        /*    if (nRet == 0x9000) {
+                String result = szReply.getRetData().toString();
+                String signDate = result.substring(0, result.length() - 4);
+                Log.e("YJL", "signDatelegth" + signDate.length());
+                SendtoUIMessage(signDate, 8);
+
+            } else {
+                SendtoUIMessage("签名失败", 7);
+            }*/
+            return null;
+        }
+    }
 
     /*获取固件版本*/
     public void GetVersion(int timeout) {

@@ -1,5 +1,7 @@
 package cwbjsdk.cwsdk.util;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import android.util.Log;
@@ -521,6 +523,12 @@ public class BJCWUtil {
         return result;
     }
 
+    public static int ByteArrayToInt(byte b[]) throws Exception {
+        ByteArrayInputStream buf = new ByteArrayInputStream(b);
 
+        DataInputStream dis= new DataInputStream(buf);
+        return dis.readInt();
+
+    }
 
 }

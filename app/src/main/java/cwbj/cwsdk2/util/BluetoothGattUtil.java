@@ -118,6 +118,9 @@ public class BluetoothGattUtil extends BluetoothGattCallback {
             mType = 9;
 //            value = BJCWUtil.StrToHex(PubUtils.sendApdu("FB803400000000", 20));
             value = BJCWUtil.StrToHex("09");
+        } else if (type == 10) {
+            mType = 10;
+            value = BJCWUtil.StrToHex("11");
         }
         BluetoothGattCharacteristic mRxChar = null;
         BluetoothGattService mRxService;
@@ -361,7 +364,9 @@ public class BluetoothGattUtil extends BluetoothGattCallback {
             String result = builder.toString();
             int pulSW = Integer.valueOf(result.substring(result.length() - 4), 16);
             if (pulSW == 0x9000) {
-                sendData(true, result.substring(0,result.length() - 4), 2);
+                sendData(true, result.substring(0, result.length() - 4), 2);
+            } else {
+                sendData(true, "指纹获取失败", 2);
             }
         } else if (mType == 8) {
             String strReadDate = new String(buffer, 0, buffer.length);
@@ -369,7 +374,9 @@ public class BluetoothGattUtil extends BluetoothGattCallback {
             String result = builder.toString();
             int pulSW = Integer.valueOf(result.substring(result.length() - 4), 16);
             if (pulSW == 0x9000) {
-                sendData(true, result.substring(0,result.length() - 4), 2);
+                sendData(true, result.substring(0, result.length() - 4), 2);
+            } else {
+                sendData(true, "指纹获取失败", 2);
             }
         } else if (mType == 9) {
             String strReadDate = new String(buffer, 0, buffer.length);
@@ -377,7 +384,19 @@ public class BluetoothGattUtil extends BluetoothGattCallback {
             String result = builder.toString();
             int pulSW = Integer.valueOf(result.substring(result.length() - 4), 16);
             if (pulSW == 0x9000) {
-                sendData(true, result.substring(0,result.length() - 4), 2);
+                sendData(true, result.substring(0, result.length() - 4), 2);
+            } else {
+                sendData(true, "指纹获取失败", 2);
+            }
+        } else if (mType == 10) {
+            String strReadDate = new String(buffer, 0, buffer.length);
+            builder.append(strReadDate);
+            String result = builder.toString();
+            int pulSW = Integer.valueOf(result.substring(result.length() - 4), 16);
+            if (pulSW == 0x9000) {
+                sendData(true, result.substring(0, result.length() - 4), 2);
+            } else {
+                sendData(true, "签名获取失败", 2);
             }
         } else {
             String strReadDate = BJCWUtil.HexTostr(buf_data, buf_data.length);

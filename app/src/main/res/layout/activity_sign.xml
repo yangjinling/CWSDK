@@ -4,15 +4,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="cwbj.cwsdk2.activity.MagicActivity">
+    tools:context="cwbj.cwsdk2.activity.SignActivity">
 
     <include layout="@layout/title"></include>
-<RelativeLayout
-    android:layout_width="match_parent"
-    android:layout_height="0dp"
-    android:layout_weight="1">
-    <include layout="@layout/content_magic" />
-<include layout="@layout/prograss"></include>
-</RelativeLayout>
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <include layout="@layout/content_sign" />
+
+        <include layout="@layout/prograss"></include>
+    </RelativeLayout>
 </LinearLayout>

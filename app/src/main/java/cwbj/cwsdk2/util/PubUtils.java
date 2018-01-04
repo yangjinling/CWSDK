@@ -1,11 +1,20 @@
 package cwbj.cwsdk2.util;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Rect;
 import android.util.Log;
+import android.widget.ImageView;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.UUID;
 
@@ -69,7 +78,8 @@ public class PubUtils {
     public static String COMMAND_PIN_CIPHERTEXT_1 = "F0000FFB8025140000080000000000000000";
     public static String COMMAND_PIN_CIPHERTEXT_2 = "F5000AFB802314000003010002";
 
-    public static String ip="172.20.10.3";
+    public static String ip = "172.20.10.3";
+
     // ///////// StringToHex:String转成byte[],再将每个byte转成两个char表示的hex�?
     public static String ByteArrayToHex(byte[] b) {
         String ret = "";
@@ -836,6 +846,108 @@ public class PubUtils {
             BJCWUtil.OutputLog("ConnectedThread***************数据完整");
             return true;
         }
+    }
+
+    /**
+     * 根据图片字节数组，对图片可能进行二次采样，不致于加载过大图片出现内存溢出
+     *
+     * @param bytes
+     * @return
+     */
+
+    public static Bitmap getBitmapByBytes(byte[] bytes) {
+
+//对于图片的二次采样,主要得到图片的宽与高
+
+        int width = 0;
+
+        int height = 0;
+
+        int sampleSize = 1;//默认缩放为1
+
+        BitmapFactory.Options options = new BitmapFactory.Options();
+
+        options.inJustDecodeBounds = true;//仅仅解码边缘区域
+
+//如果指定了inJustDecodeBounds，decodeByteArray将返回为空
+
+        BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
+
+//得到宽与高
+
+        height = options.outHeight;
+
+        width = options.outWidth;
+
+//图片实际的宽与高，根据默认最大大小值，得到图片实际的缩放比例
+
+        while ((height / sampleSize > Cache.IMAGE_MAX_HEIGH)
+
+                || (width / sampleSize > Cache.IMAGE_MAX_WIDTH)) {
+
+            sampleSize *= 2;
+
+        }
+
+//不再只加载图片实际边缘
+
+        options.inJustDecodeBounds = false;
+
+//并且制定缩放比例
+
+        options.inSampleSize = sampleSize;
+
+        return BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
+
+    }
+
+//默认大小
+
+    class Cache {
+
+        public static final int IMAGE_MAX_HEIGH = 854;
+
+        public static final int IMAGE_MAX_WIDTH = 480;
+
+    }
+
+    public static Bitmap bitmap;
+
+    public static Bitmap decodeSampledBitmapFromByteArray(byte[]data,
+                                                          int reqWidth, int reqHeight, Rect outPadding){
+
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeByteArray(data, 0, data.length, options);
+
+        options.inSampleSize = calculateInSampleSize(options, reqWidth,
+                reqHeight);
+        options.inJustDecodeBounds = false;
+        Log.i("outPadding", "---------");
+        return BitmapFactory.decodeByteArray(data, 0, data.length, options);
+    }
+    public static int calculateInSampleSize(BitmapFactory.Options options,
+                                            int reqWidth, int reqHeight) {
+        // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
+
+            // Calculate the largest inSampleSize value that is a power of 2 and
+            // keeps both
+            // height and width larger than the requested height and width.
+            while ((halfHeight / inSampleSize) > reqHeight
+                    && (halfWidth / inSampleSize) > reqWidth) {
+                inSampleSize *= 2;
+            }
+        }
+
+        return inSampleSize;
     }
 
 
