@@ -92,7 +92,14 @@ public class CWSDK {
     List<String> items = null;
     public int workmode = 0;
     public Handler mhandler;
-    final int[] key = {0x11111111, 0x11111111, 0x11111111, 0x11111111};
+    final int[] key = {0x11111111, 0x11111111, 0x11111111, 0x11110136};
+    private GetMagicCardAsynTask magicCardAsynTask;
+    private CWSDK.pbocReadInfoAsynTask pbocReadInfoAsynTask;
+    private CWSDK.idReadMessageAsynTask idReadMessageAsynTask;
+    private SignAsynTask signAsynTask;
+    private PsamAsynTask psamAsynTask;
+    private GetFprinterTestAsynTask fprinterTestAsynTask;
+
 
     private void LogOut(String strData) {
         // Log.v("CGenUtil", strData);
@@ -154,6 +161,11 @@ public class CWSDK {
         } else if (ctr == 0x11) {
             Message msg = new Message();
             msg.what = 0x11;
+            msg.obj = str;
+            mhandler.sendMessage(msg);
+        } else if (ctr == 12) {
+            Message msg = new Message();
+            msg.what = 12;
             msg.obj = str;
             mhandler.sendMessage(msg);
         }
@@ -247,7 +259,7 @@ public class CWSDK {
             } else {
                 /*密文获取pin*/
                 nRet = mConnectionBle.sendApdu("FB8025800000080000000000000000", nTime, szReply);
-                nRet = mConnectionBle.sendApdu("FB802380000003010002", nTime, szReply);
+                nRet = mConnectionBle.sendApdu("FB802380000003010001", nTime, szReply);
             }
 
             if (nRet == 0x9000) {
@@ -276,9 +288,8 @@ public class CWSDK {
         LogOut("GetMagicCard IN");
         nTime = timeout;
         bIsCancleApdu = true;
-        new GetMagicCardAsynTask().execute("");
-
-
+        magicCardAsynTask = new GetMagicCardAsynTask();
+        magicCardAsynTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
 
@@ -325,20 +336,103 @@ public class CWSDK {
             return null;
 
         }
+
+        @Override
+        protected void onCancelled() {
+            super.onCancelled();
+        }
+    }
+
+    /*取消操作*/
+    public void cancle(int type) {
+        LogOut("Cancle IN");
+        switch (type) {
+            case 0:
+                //读取接触或非接触
+                if (pbocReadInfoAsynTask != null && !pbocReadInfoAsynTask.isCancelled()
+                        && pbocReadInfoAsynTask.getStatus() == AsyncTask.Status.RUNNING) {
+                    pbocReadInfoAsynTask.cancel(true);
+                    pbocReadInfoAsynTask = null;
+                }
+                break;
+            case 1:
+                //读身份证
+                if (idReadMessageAsynTask != null && !idReadMessageAsynTask.isCancelled()
+                        && idReadMessageAsynTask.getStatus() == AsyncTask.Status.RUNNING) {
+                    idReadMessageAsynTask.cancel(true);
+                    idReadMessageAsynTask = null;
+                }
+                break;
+            case 2:
+                //指纹读取
+                Log.e("YJL", "type==" + type);
+                if (fprinterTestAsynTask != null && !fprinterTestAsynTask.isCancelled()
+                        && fprinterTestAsynTask.getStatus() == AsyncTask.Status.RUNNING) {
+                    fprinterTestAsynTask.cancel(true);
+                    fprinterTestAsynTask = null;
+                }
+                break;
+            case 3:
+                //读取磁条卡
+                if (magicCardAsynTask != null && !magicCardAsynTask.isCancelled()
+                        && magicCardAsynTask.getStatus() == AsyncTask.Status.RUNNING) {
+                    magicCardAsynTask.cancel(true);
+                    magicCardAsynTask = null;
+                }
+                break;
+            case 4:
+                //键盘
+                break;
+            case 5:
+                //签名
+                if (signAsynTask != null && !signAsynTask.isCancelled()
+                        && signAsynTask.getStatus() == AsyncTask.Status.RUNNING) {
+                    signAsynTask.cancel(true);
+                    signAsynTask = null;
+                }
+                break;
+            case 6:
+                //PSAM
+//                psamAsynTask.cancel(true);
+//                psamAsynTask = null;
+                break;
+        }
+        new cancleAsynTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+
+    private class cancleAsynTask extends AsyncTask<String, Void, Integer> {
+
+
+        @Override
+        protected Integer doInBackground(String... params) {
+
+            int i;
+            LogOut("Cancle IN");
+            APDUReplyData szReply = new APDUReplyData();
+            mConnectionBle.sendApduCancle("FA", nTime, szReply);
+            SendtoUIMessage("取消成功", 12);
+            return null;
+
+        }
     }
 
     /*指纹特征*/
-    public void GetFprinterTest(int timeout) {
+    public void GetFprinterTest(int type) {
         LogOut("GetFprinterVer IN");
-        nTime = timeout;
-        bIsCancleApdu = true;
-        new GetFprinterTestAsynTask().execute("");
+        this.type = type;
+//        bIsCancleApdu = true;
+        fprinterTestAsynTask = new GetFprinterTestAsynTask();
+        fprinterTestAsynTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
     }
 
-
     private class GetFprinterTestAsynTask extends AsyncTask<String, Void, Integer> {
 
+        @Override
+        protected void onProgressUpdate(Void... values) {
+            if (isCancelled()) return;
+        }
 
         @Override
         protected Integer doInBackground(String... params) {
@@ -358,18 +452,31 @@ public class CWSDK {
             }
             nRet = mConnectionBle.sendApdu("00000000000000", nTime, szReply);
 */
-            int nRet = mConnectionBle.sendApduFinger("09", szReply);
+            // Task被取消了，马上退出
+            int nRet = 0;
+            if (type == 0) {//版本
+                nRet = mConnectionBle.sendApduFinger("08", szReply);
+            } else if (type == 1) {//模板
+                nRet = mConnectionBle.sendApduFinger("10", szReply);
+            } else if (type == 2) {//特征
+                nRet = mConnectionBle.sendApduFinger("09", szReply);
+            }
             if (nRet == 0x9000) {
                 String result = szReply.getRetData().toString();
                 String StrVer = result.substring(0, result.length() - 4);
                 SendtoUIMessage(StrVer, 8);
             } else {
-                SendtoUIMessage("获取指纹模板错误", 7);
+                SendtoUIMessage("取消成功", 7);
             }
             return null;
         }
 
 
+        @Override
+        protected void onCancelled() {
+            Log.e("YJL","取消");
+            super.onCancelled();
+        }
     }
 
     /*指纹模块版本读取*/
@@ -412,7 +519,7 @@ public class CWSDK {
                 String StrVer = result.substring(0, result.length() - 4);
                 SendtoUIMessage(StrVer, 8);
             } else {
-                SendtoUIMessage("获取指纹模板错误", 7);
+                SendtoUIMessage("获取指纹信息错误", 7);
             }
             return null;
         }
@@ -495,12 +602,12 @@ public class CWSDK {
     private int type;
 
     public void sign(int type) {
-        LogOut("GetFprinter IN");
+        LogOut("Sign IN");
         this.type = type;
         bIsCancleApdu = true;
-        new SignAsynTask().execute("");
+        signAsynTask = new SignAsynTask();
+        signAsynTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
-
 
     private class SignAsynTask extends AsyncTask<String, Void, Integer> {
 
@@ -524,6 +631,53 @@ public class CWSDK {
                 SendtoUIMessage("签名失败", 7);
             }*/
             return null;
+        }
+
+        @Override
+        protected void onCancelled() {
+            super.onCancelled();
+        }
+    }
+
+    /*获取psam*/
+
+    public void getPsam(int type) {
+        LogOut("GetFprinter IN");
+        this.type = type;
+        bIsCancleApdu = true;
+        psamAsynTask = new PsamAsynTask();
+        psamAsynTask.execute("");
+    }
+
+    private class PsamAsynTask extends AsyncTask<String, Void, Integer> {
+
+        @Override
+        protected Integer doInBackground(String... params) {
+            APDUReplyData szReply = new APDUReplyData();
+            int nRet = 0;
+            if (type == 0) {
+                mConnectionBle.sendApdu("fB80211400000a62000000000000000000", nTime, szReply);
+                nRet = mConnectionBle.sendApdu("fB8021140000156f0b000000000000000000a4040006a00000033301", nCancletimout, szCancleReply);
+                if (nRet != 0x9000) {
+                    // mConnectionBle.sendApdu("FB810001000000", nCancletimout, szCancleReply);
+                    SendtoUIMessage("psam错误", 6);
+                } else {
+
+                    String StrVer = szReply.getRetData().toString();
+
+                    byte[] Ver = BJCWUtil.StrToHex(StrVer);
+
+                    String ShowVer = new String(Ver);
+
+                    SendtoUIMessage(ShowVer, 6);
+
+                }
+            } else {
+                mConnectionBle.sendApdu("fB80221400000a62000000000000000000", nTime, szReply);
+                nRet = mConnectionBle.sendApdu("fB8022140000156f0b000000000000000000a4040006a00000033301", nCancletimout, szCancleReply);
+            }
+            mConnectionBle.sendApdu("fB810014000000", nCancletimout, szCancleReply);
+            return 0;
         }
     }
 
@@ -588,7 +742,8 @@ public class CWSDK {
         nCancleApdu = 0;
         nTime = timeout;
         bIsCancleApdu = true;
-        new idReadMessageAsynTask().execute("");
+        idReadMessageAsynTask = new idReadMessageAsynTask();
+        idReadMessageAsynTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     /*异步读取身份证信息*/
@@ -657,6 +812,11 @@ public class CWSDK {
             bIsCancleApdu = false;
             LogOut("idReadMessageAsynTask End");
             IDataBeanCallback.postData(SWdataBean);
+        }
+
+        @Override
+        protected void onCancelled() {
+            super.onCancelled();
         }
     }
 
@@ -1333,6 +1493,11 @@ public class CWSDK {
             LogOut("pbocReadInfoAsynTask End");
             IDataBeanCallback.postData(SWdataBean);
         }
+
+        @Override
+        protected void onCancelled() {
+            super.onCancelled();
+        }
     }
 
 
@@ -1347,7 +1512,8 @@ public class CWSDK {
         }
         nTime = timeout;
         bIsCancleApdu = true;
-        new pbocReadInfoAsynTask().execute("");
+        pbocReadInfoAsynTask = new pbocReadInfoAsynTask();
+        pbocReadInfoAsynTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
 

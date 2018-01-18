@@ -49,6 +49,7 @@ public class WorkActivity extends Activity implements View.OnClickListener {
     String cardInfo;
     private SocketClient client;
     Handler wifiHandler = null;
+    private Button cancle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +67,7 @@ public class WorkActivity extends Activity implements View.OnClickListener {
         tv = (TextView) findViewById(R.id.textViewcn);
         btc = (Button) findViewById(R.id.button);
         btcl = (Button) findViewById(R.id.button2);
+        cancle = ((Button) findViewById(R.id.cancle));
         sMAC = null;
         sMAC = getIntent().getStringExtra("MAC");
         prograssBar = ((ProgressBar) findViewById(R.id.prograss));
@@ -74,8 +76,11 @@ public class WorkActivity extends Activity implements View.OnClickListener {
             public void handleMessage(Message msg) {
 
                 if (msg.what == 0x3) {
-                    prograssBar.setVisibility(View.INVISIBLE);
+//                    prograssBar.setVisibility(View.INVISIBLE);
                     tv.setText("读取卡号为：" + msg.obj.toString());
+                } else if (msg.what == 12) {
+//                    prograssBar.setVisibility(View.INVISIBLE);
+                    tv.setText("取消操作成功");
                 }
 
             }
@@ -83,7 +88,7 @@ public class WorkActivity extends Activity implements View.OnClickListener {
         wifiHandler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
-                prograssBar.setVisibility(View.INVISIBLE);
+//                prograssBar.setVisibility(View.INVISIBLE);
                 switch (msg.what) {
                     case 1:
                         tv.setText("读取卡号为：" + msg.obj.toString());
@@ -176,7 +181,7 @@ public class WorkActivity extends Activity implements View.OnClickListener {
             @Override
             public void onClick(View v) {
                 PubUtils.isContact = true;
-                prograssBar.setVisibility(View.VISIBLE);
+//                prograssBar.setVisibility(View.VISIBLE);
                 if (PubUtils.isWifi) {
                     //socket通信
                     SocketClient.type = 1;
@@ -203,7 +208,7 @@ public class WorkActivity extends Activity implements View.OnClickListener {
             @Override
             public void onClick(View v) {
                 PubUtils.isContact = false;
-                prograssBar.setVisibility(View.VISIBLE);
+//                prograssBar.setVisibility(View.VISIBLE);
                 if (PubUtils.isWifi) {
                     SocketClient.type = 2;
                     //socket通信
@@ -226,6 +231,12 @@ public class WorkActivity extends Activity implements View.OnClickListener {
             }
         });
 
+        cancle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                cwsdk.cancle(0);
+            }
+        });
 
     }
 

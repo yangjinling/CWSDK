@@ -9,72 +9,73 @@
     tools:context="cwbj.cwsdk2.activity.MagicActivity"
     tools:showIn="@layout/activity_magic">
 
-        <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" >
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
         <TextView
+            android:id="@+id/textView5"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="27dp"
             android:layout_marginTop="27dp"
-            android:layout_marginLeft="27dp"
-            android:text="一磁道数据："
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/textView5" />
+            android:text="一磁道数据：" />
 
         <TextView
-            android:text="内容"
-            android:layout_marginTop="10dp"
-            android:layout_marginLeft="27dp"
+            android:id="@+id/textView6"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/textView6" />
+            android:layout_marginLeft="27dp"
+            android:layout_marginTop="10dp"
+            android:text="内容" />
 
         <TextView
-            android:layout_marginTop="10dp"
-            android:layout_marginLeft="27dp"
-            android:text="二磁道数据:"
+            android:id="@+id/textView7"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/textView7" />
+            android:layout_marginLeft="27dp"
+            android:layout_marginTop="10dp"
+            android:text="二磁道数据:" />
 
         <TextView
-            android:text="内容"
-            android:layout_marginTop="10dp"
-            android:layout_marginLeft="27dp"
+            android:id="@+id/textView8"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/textView8" />
+            android:layout_marginLeft="27dp"
+            android:layout_marginTop="10dp"
+            android:text="内容" />
 
         <TextView
-            android:text="三磁道数据:"
-            android:layout_marginTop="10dp"
-            android:layout_marginLeft="27dp"
+            android:id="@+id/textView9"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/textView9" />
+            android:layout_marginLeft="27dp"
+            android:layout_marginTop="10dp"
+            android:text="三磁道数据:" />
 
 
         <TextView
-            android:text="内容"
-            android:layout_marginTop="10dp"
-            android:layout_marginLeft="27dp"
+            android:id="@+id/textView10"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/textView10" />
+            android:layout_marginLeft="27dp"
+            android:layout_marginTop="10dp"
+            android:text="内容" />
 
         <Button
-            android:text="读取刷卡器"
-            android:background="@drawable/button_style"
-            android:textSize="20sp"
-            android:layout_marginLeft="45dp"
-            android:layout_marginRight="45dp"
-            android:textColor="@android:color/white"
-            android:layout_marginTop="20dp"
+            android:id="@+id/button7"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/button7" />
+            android:layout_marginLeft="45dp"
+            android:layout_marginRight="45dp"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/button_style"
+            android:text="读取刷卡器"
+            android:textColor="@android:color/white"
+            android:textSize="20sp" />
 
-        </LinearLayout>
+        <include layout="@layout/content_cancle"></include>
+    </LinearLayout>
 
 </RelativeLayout>

@@ -254,6 +254,24 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
+        if (id == R.id.action_p) {
+            /*PSAM1*/
+            if (PubUtils.isWifi) {
+                Intent intent = new Intent(MainActivity.this, PsamActivity.class);
+                intent.putExtra("MAC", SelecetedMACStr);
+                startActivity(intent);
+            } else {
+                if ("已配对".equals(et3.getText().toString())) {
+                    Intent intent = new Intent(MainActivity.this, PsamActivity.class);
+                    intent.putExtra("MAC", SelecetedMACStr);
+                    startActivity(intent);
+                } else if (TextUtils.isEmpty(et3.getText().toString())) {
+                    Toast.makeText(this, "请去扫描选择蓝牙设备", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "请去设置中进行蓝牙配对", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
         return super.onOptionsItemSelected(item);
     }
 

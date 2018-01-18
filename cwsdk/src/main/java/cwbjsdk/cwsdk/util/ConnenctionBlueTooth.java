@@ -406,21 +406,18 @@ public class ConnenctionBlueTooth {
         mbGetReply = false;
         finger = true;
         sign = false;
+        bCancle = false;
         byte[] value = BJCWUtil.StrToHex(cmd);
         write(value, 0, value.length);
         while (!mbGetReply) {
-            if (null == mstrReplayString || !mstrReplayString.endsWith("9000")) {
+            if (null == mstrReplayString) {
                 continue;
             }
-            if (null != mstrReplayString && mstrReplayString.endsWith("9000")) {
+            if (null != mstrReplayString && (mstrReplayString.endsWith("9000"))) {
                 break;
             }
         }
-        if (mState == STATE_NONE) {
-            BJCWUtil.OutputLog("关闭蓝牙");
-            return CONST_PARAM.RT_BLUETOOTH_FAILED;
-        }
-        if (mstrReplayString != null && mstrReplayString.endsWith("9000")) {
+        if (mstrReplayString != null && (mstrReplayString.endsWith("9000"))) {
             int nLen = mstrReplayString.length();
             String strSW = mstrReplayString.substring(nLen - 4);
             int pulSW = Integer.valueOf(strSW, 16);
@@ -454,6 +451,116 @@ public class ConnenctionBlueTooth {
         if (!TextUtils.isEmpty(mstrReplayString)) {
 
         }
+    }
+
+    public int sendApduCancle(String cmd, int time, APDUReplyData szReply) {
+        int nLen;
+        finger = false;
+        int pulSW = 0;
+        sign = false;
+        BJCWUtil.OutputLog("sendApdu IN");
+        String strLog = new String();
+        String strSW = new String();
+        String strReply = new String();
+        mstrReplayString = "";
+        mbGetReply = false;
+        bSendApdu = true;
+        int nReplyCount = 0;
+        // 重发机制
+        do {
+            byte[] cmds = BJCWUtil.StrToHex(cmd);
+            write(cmds, 0, cmds.length);
+            int i = 0;
+            while (!mbGetReply) {
+                if (bCancle) {
+                    BJCWUtil.OutputLog("***取消操作****");
+                    mstrReplayString = "5200026d00";
+                    break;
+                }
+                try {
+                    Thread.sleep(50);
+                    if (i++ > nApduTime) {
+                        break;
+                    }
+                } catch (Exception e) {
+                    // TODO: handle exception
+                    BJCWUtil.OutputLog(e.getLocalizedMessage());
+                    return CONST_PARAM.RT_SENDDATA_FAILED;
+                }
+            }
+            BJCWUtil.OutputLog(String.format("\nResultDate:%s", mstrReplayString));
+            // 添加这个 蓝牙关闭 无数据返回
+            if (mState == STATE_NONE) {
+                BJCWUtil.OutputLog("关闭蓝牙");
+                return CONST_PARAM.RT_BLUETOOTH_FAILED;
+            }
+            BJCWUtil.OutputLog("sendApdu 1");
+            if (mstrReplayString.length() <= 4)//
+            {
+                BJCWUtil.OutputLog("接收到的数据长度不正确");
+                break;
+            }
+            if (mstrReplayString.equals("00026984") || mstrReplayString.equals("5200026984")) {
+                BJCWUtil.OutputLog("6984 错误 重发");
+                mbGetReply = false;
+                mstrReplayString = "";
+                nReplyCount++;
+                continue;
+            }
+            BJCWUtil.OutputLog("sendApdu 2");
+            String strStartDate = mstrReplayString.substring(0, 2);
+
+            // 重发机制*************************
+            if (!strStartDate.equals("52")) {
+                BJCWUtil.OutputLog("52开头 接受错误，重发");
+                mbGetReply = false;
+                mstrReplayString = "";
+                nReplyCount++;
+            } else {
+                String strReplyLen = mstrReplayString.substring(2, 6);
+                int nstrReplyLen = Integer.parseInt(strReplyLen, 16);
+                int nReplyLen = mstrReplayString.length() - 6;
+                if (nstrReplyLen * 2 != nReplyLen) {
+                    BJCWUtil.OutputLog("长度 接受错误，重发");
+                    mbGetReply = false;
+                    mstrReplayString = "";
+                    nReplyCount++;
+                } else {
+                    BJCWUtil.OutputLog("sendApdu 3");
+                    break;
+                }
+            }
+            BJCWUtil.OutputLog("重发****");
+        } while (nReplyCount < 6);
+        BJCWUtil.OutputLog("sendApdu 4");
+        nLen = mstrReplayString.length();
+        BJCWUtil.OutputLog(String.format("\nnLen:%d,ResultDate:%s", nLen, mstrReplayString));
+        if (nLen >= 4) {
+            if (mstrReplayString.equals("00026984")) {
+                szReply.setRetData("");
+                szReply.setSW(0x6984);
+            } else {
+                //TODO 数据传递
+                strReply = mstrReplayString.substring(6, nLen - 4);// 4
+                strSW = mstrReplayString.substring(nLen - 4);
+                pulSW = Integer.valueOf(strSW, 16);
+                Log.e("YJL", "length-==-=" + strReply.length());
+                szReply.setRetData(strReply);
+                szReply.setSW(pulSW);
+            }
+
+        } else {
+            /*
+             * //添加这个 蓝牙关闭 无数据返回 if (mState==STATE_NONE) { return
+			 * CONST_PARAM.RT_BLUETOOTH_FAILED; }
+			 */
+            szReply.setRetData(strReply);
+            szReply.setSW(0x000C);
+        }
+        nApduType = 0;
+        BJCWUtil.OutputLog(String.format("Reply:%s,SW:%s", strReply, strSW));
+        strReply = "";
+        return szReply.getSW();
     }
 
     /**
@@ -833,7 +940,7 @@ public class ConnenctionBlueTooth {
                                 }
                                 if (finger) {
                                     strReadDate = new String(buf_data, 0, buf_data.length);
-                                        Log.e("YJL","strReadDate=="+strReadDate);
+                                    Log.e("YJL", "strReadDate==" + strReadDate);
                                     if (strReadDate.startsWith("52")) {
                                     } else {
                                         strReadDate = "52" + strReadDate;
@@ -862,7 +969,7 @@ public class ConnenctionBlueTooth {
                                         mbGetReply = true;
 //                                 mbGetReply = true;
                                         Message msg = Message.obtain();
-                                        msg.what = 8;
+                                        msg.what = 12;
                                         mHandler.sendMessage(msg);
                                         buffers = new byte[1024];
                                         buffer = new byte[1024];

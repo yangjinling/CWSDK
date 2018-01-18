@@ -47,6 +47,7 @@ public class MagicActivity extends Activity implements View.OnClickListener {
     private boolean isCanWrite;
     private SocketClient client;
     Handler wifiHandler = null;
+    private Button cancle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +67,7 @@ public class MagicActivity extends Activity implements View.OnClickListener {
         tv2 = (TextView) findViewById(R.id.textView8);
         tv3 = (TextView) findViewById(R.id.textView10);
         btc = (Button) findViewById(R.id.button7);
+        cancle = ((Button) findViewById(R.id.cancle));
         prograssBar = ((ProgressBar) findViewById(R.id.prograss));
         sMAC = null;
         sMAC = getIntent().getStringExtra("MAC");
@@ -74,13 +76,16 @@ public class MagicActivity extends Activity implements View.OnClickListener {
         handler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
-                prograssBar.setVisibility(View.INVISIBLE);
+//                prograssBar.setVisibility(View.INVISIBLE);
                 switch (msg.what) {
                     case 9:
                         Show3Tracks(msg.obj.toString());
                         break;
                     case 7:
                         Toast.makeText(MagicActivity.this, "" + msg.obj.toString(), Toast.LENGTH_SHORT).show();
+                        break;
+                    case 12:
+                        Toast.makeText(MagicActivity.this, "取消操作", Toast.LENGTH_SHORT).show();
                         break;
 
                 }
@@ -91,7 +96,7 @@ public class MagicActivity extends Activity implements View.OnClickListener {
         wifiHandler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
-                prograssBar.setVisibility(View.INVISIBLE);
+//                prograssBar.setVisibility(View.INVISIBLE);
                 switch (msg.what) {
                     case 1:
                         String result = dealTrackData(msg.obj.toString());
@@ -171,7 +176,7 @@ public class MagicActivity extends Activity implements View.OnClickListener {
 
             @Override
             public void onClick(View v) {
-                prograssBar.setVisibility(View.VISIBLE);
+//                prograssBar.setVisibility(View.VISIBLE);
                 if (PubUtils.isWifi) {
                     //socket通信
                     client.sendMsg(4);
@@ -192,7 +197,12 @@ public class MagicActivity extends Activity implements View.OnClickListener {
 
             }
         });
-
+        cancle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                cwsdk.cancle(3);
+            }
+        });
 
     }
 

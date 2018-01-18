@@ -87,6 +87,10 @@
         <activity
             android:name=".activity.SignActivity"
             android:label="签名"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".activity.PsamActivity"
+            android:label="PSAM"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 

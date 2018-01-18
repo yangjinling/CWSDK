@@ -44,7 +44,7 @@ public class KeyPadActivity extends Activity {
 
     Handler handler = null;
 
-    int[] key = {0x11111111, 0x11111111, 0x11111111, 0x11111111};
+    int[] key = {0x11111111, 0x11111111, 0x11111111, 0x11110136};
     private ImageView btn_back;
     private TextView tv_title;
     private ProgressBar prograssBar;
@@ -91,7 +91,7 @@ public class KeyPadActivity extends Activity {
                     prograssBar.setVisibility(View.INVISIBLE);
                     tv2.setText(msg.obj.toString().split(";")[0]);
                     tv3.setText(msg.obj.toString().split(";")[1]);
-                } else  if (msg.what == 0x7) {
+                } else if (msg.what == 0x7) {
                     prograssBar.setVisibility(View.INVISIBLE);
                     Toast.makeText(KeyPadActivity.this, msg.obj.toString(), Toast.LENGTH_SHORT).show();
                 }

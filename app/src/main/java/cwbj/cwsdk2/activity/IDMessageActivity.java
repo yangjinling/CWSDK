@@ -57,6 +57,7 @@ public class IDMessageActivity extends Activity implements View.OnClickListener 
 
     private SocketClient client;
     Handler wifiHandler = null;
+    private Button cancle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,6 +79,7 @@ public class IDMessageActivity extends Activity implements View.OnClickListener 
         tv = (TextView) findViewById(R.id.textView);
         btc = (Button) findViewById(R.id.button3);
         prograssBar = ((ProgressBar) findViewById(R.id.prograss));
+        cancle = ((Button) findViewById(R.id.cancle));
 //        initCommand();
         sMAC = null;
         sMAC = getIntent().getStringExtra("MAC");
@@ -87,8 +89,10 @@ public class IDMessageActivity extends Activity implements View.OnClickListener 
             public void handleMessage(Message msg) {
 
                 if (msg.what == 0x5) {
-                    prograssBar.setVisibility(View.INVISIBLE);
+//                    prograssBar.setVisibility(View.INVISIBLE);
                     showIDIDinfo();
+                } else if (msg.what == 12) {
+                    Toast.makeText(IDMessageActivity.this, "取消操作成功", Toast.LENGTH_SHORT).show();
                 }
 
             }
@@ -96,7 +100,7 @@ public class IDMessageActivity extends Activity implements View.OnClickListener 
         wifiHandler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
-                prograssBar.setVisibility(View.INVISIBLE);
+//                prograssBar.setVisibility(View.INVISIBLE);
                 switch (msg.what) {
                     case 1:
                         if (msg.obj.toString().length() > 0) {
@@ -191,7 +195,7 @@ public class IDMessageActivity extends Activity implements View.OnClickListener 
 
             @Override
             public void onClick(View v) {
-                prograssBar.setVisibility(View.VISIBLE);
+//                prograssBar.setVisibility(View.VISIBLE);
                 if (PubUtils.isWifi) {
                     //socket通信
                     client.sendMsg(3);
@@ -212,7 +216,12 @@ public class IDMessageActivity extends Activity implements View.OnClickListener 
 
             }
         });
-
+        cancle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                cwsdk.cancle(1);
+            }
+        });
 
     }
 

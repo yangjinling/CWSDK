@@ -45,6 +45,7 @@ public class SignActivity extends AppCompatActivity {
     String sMAC = "00:00:00:00";
     BluetoothDevice WorkDev = null;
     private Button btn_sign;
+    private Button cancle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +61,7 @@ public class SignActivity extends AppCompatActivity {
             }
         });
         tv_title = ((TextView) findViewById(R.id.main_title));
+        cancle = ((Button) findViewById(R.id.cancle));
         tv_title.setText("签名");
         sMAC = null;
         sMAC = getIntent().getStringExtra("MAC");
@@ -67,7 +69,7 @@ public class SignActivity extends AppCompatActivity {
         bluetoothHandler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
-                prograssBar.setVisibility(View.INVISIBLE);
+//                prograssBar.setVisibility(View.INVISIBLE);
 
                 switch (msg.what) {
                     case 7:
@@ -80,8 +82,8 @@ public class SignActivity extends AppCompatActivity {
                         }
                         break;
 
-                    case 8:
-                        Log.e("YJL", "失败");
+                    case 12:
+                        Toast.makeText(SignActivity.this,"签名取消",Toast.LENGTH_SHORT).show();
 //                        cwsdk.connectionDevice(WorkDev);
 ////                        eventMask = 0xF;
 //                        cwsdk.sign(1);
@@ -92,7 +94,7 @@ public class SignActivity extends AppCompatActivity {
         wifiHandler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
-                prograssBar.setVisibility(View.INVISIBLE);
+//                prograssBar.setVisibility(View.INVISIBLE);
                 switch (msg.what) {
                     case 7:
                         Toast.makeText(SignActivity.this, "" + msg.obj.toString(), Toast.LENGTH_SHORT).show();
@@ -174,7 +176,7 @@ public class SignActivity extends AppCompatActivity {
         btn_sign.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                prograssBar.setVisibility(View.VISIBLE);
+//                prograssBar.setVisibility(View.VISIBLE);
                 if (PubUtils.isWifi) {
                     //socket通信
                     client.sendMsg(10);
@@ -193,6 +195,13 @@ public class SignActivity extends AppCompatActivity {
 
                     }
                 }
+            }
+        });
+
+        cancle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                cwsdk.cancle(5);
             }
         });
 

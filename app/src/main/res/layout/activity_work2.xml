@@ -44,18 +44,18 @@
             <Button
                 android:id="@+id/button"
                 android:layout_width="match_parent"
-                android:layout_height="33dp"
+                android:layout_height="wrap_content"
                 android:layout_marginLeft="45dp"
                 android:layout_marginRight="45dp"
-                android:background="@drawable/button_style"
-                android:text="读取接触卡卡号"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/button_style" android:text="读取接触卡卡号"
                 android:textColor="@android:color/white"
                 android:textSize="20sp" />
 
             <Button
                 android:id="@+id/button2"
                 android:layout_width="match_parent"
-                android:layout_height="33dp"
+                android:layout_height="wrap_content"
                 android:layout_marginLeft="45dp"
                 android:layout_marginRight="45dp"
                 android:layout_marginTop="10dp"
@@ -63,6 +63,7 @@
                 android:text="读取非接触卡卡号"
                 android:textColor="@android:color/white"
                 android:textSize="20sp"></Button>
+        <include layout="@layout/content_cancle"></include>
         </LinearLayout>
     </LinearLayout>
 

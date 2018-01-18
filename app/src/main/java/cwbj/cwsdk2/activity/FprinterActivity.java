@@ -47,6 +47,7 @@ public class FprinterActivity extends Activity {
     private boolean isCanWrite;
     private SocketClient client;
     Handler wifiHandler = null;
+    private Button cancle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +65,7 @@ public class FprinterActivity extends Activity {
         bt1 = (Button) findViewById(R.id.button4);
         bt2 = (Button) findViewById(R.id.button5);
         bt3 = (Button) findViewById(R.id.button6);
+        cancle = ((Button) findViewById(R.id.cancle));
         prograssBar = ((ProgressBar) findViewById(R.id.prograss));
         builder = new AlertDialog.Builder(this);
 //        initCommand();
@@ -75,12 +77,12 @@ public class FprinterActivity extends Activity {
             public void handleMessage(Message msg) {
 
                 if (msg.what == 0x7) {
-                    prograssBar.setVisibility(View.INVISIBLE);
+//                    prograssBar.setVisibility(View.INVISIBLE);
                     Toast.makeText(FprinterActivity.this, msg.obj.toString(), Toast.LENGTH_SHORT).show();
                 }
 
                 if (msg.what == 0x8) {
-                    prograssBar.setVisibility(View.INVISIBLE);
+//                    prograssBar.setVisibility(View.INVISIBLE);
                     // tv.setText("读取固件版本号为：" + msg.obj.toString());
 
                     //AlertDialog.Builder builder=new AlertDialog.Builder(this);
@@ -96,6 +98,9 @@ public class FprinterActivity extends Activity {
                     AlertDialog dialog = builder.create();//获取dialog
                     dialog.show();//显示对话框
 
+                }
+                if (msg.what == 12) {
+                    Toast.makeText(FprinterActivity.this, msg.obj.toString(), Toast.LENGTH_SHORT).show();
                 }
 
 
@@ -211,7 +216,7 @@ public class FprinterActivity extends Activity {
         bt1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                prograssBar.setVisibility(View.VISIBLE);
+//                prograssBar.setVisibility(View.VISIBLE);
                 if (PubUtils.isWifi) {
                     //socket通信
                     client.sendMsg(7);
@@ -225,7 +230,7 @@ public class FprinterActivity extends Activity {
                         }
                     } else {
                         cwsdk.connectionDevice(WorkDev);
-                        cwsdk.GetFprinterVer(20);
+                        cwsdk.GetFprinterTest(0);
                     }
                 }
             }
@@ -235,7 +240,7 @@ public class FprinterActivity extends Activity {
         bt2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                prograssBar.setVisibility(View.VISIBLE);
+//                prograssBar.setVisibility(View.VISIBLE);
                 if (PubUtils.isWifi) {
                     //socket通信
                     client.sendMsg(8);
@@ -249,7 +254,7 @@ public class FprinterActivity extends Activity {
                         }
                     } else {
                         cwsdk.connectionDevice(WorkDev);
-                        cwsdk.GetFprinter(20);
+                        cwsdk.GetFprinterTest(1);
                     }
                 }
             }
@@ -258,7 +263,7 @@ public class FprinterActivity extends Activity {
         bt3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                prograssBar.setVisibility(View.VISIBLE);
+//                prograssBar.setVisibility(View.VISIBLE);
                 if (PubUtils.isWifi) {
                     //socket通信
                     client.sendMsg(9);
@@ -272,12 +277,17 @@ public class FprinterActivity extends Activity {
                         }
                     } else {
                         cwsdk.connectionDevice(WorkDev);
-                        cwsdk.GetFprinterTest(20);
+                        cwsdk.GetFprinterTest(2);
                     }
                 }
             }
         });
-
+        cancle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                cwsdk.cancle(2);
+            }
+        });
 
     }
 

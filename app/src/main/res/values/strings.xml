@@ -10,6 +10,7 @@
     <string name="action_Fprinter">指纹获取</string>
     <string name="action_MagicCard">读取磁条卡</string>
     <string name="action_KeyPad">键盘输入pin</string>
+    <string name="action_pasm">PSAM</string>
     <string name="title_activity_get_ver">GetVerActivity</string>
     <string name="title_activity_fprinter">FprinterActivity</string>
     <string name="title_activity_magic">MagicActivity</string>
