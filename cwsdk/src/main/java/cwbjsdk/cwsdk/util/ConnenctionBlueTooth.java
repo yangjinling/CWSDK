@@ -1118,4 +1118,12 @@ public class ConnenctionBlueTooth {
         }
     }
 
+    public void close() {
+        if (null != mConnectedThread) {
+            mConnectedThread.cancel();
+        }
+        if (null != mConnectThread) {
+            mConnectThread.cancel();
+        }
+    }
 }

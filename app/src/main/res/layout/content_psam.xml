@@ -33,6 +33,18 @@
         android:text="psam2"
         android:textColor="@android:color/white"
         android:textSize="20sp" />
+    <Button
+        android:visibility="gone"
+        android:id="@+id/cancle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="45dp"
+        android:layout_marginRight="45dp"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/button_style"
+        android:text="取消"
+        android:textColor="@android:color/white"
+        android:textSize="20sp" />
 
 
 </LinearLayout>

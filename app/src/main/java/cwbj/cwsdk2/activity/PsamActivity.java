@@ -28,6 +28,8 @@ public class PsamActivity extends AppCompatActivity {
     private ImageView btn_back;
     private TextView tv_title;
     private ProgressBar prograssBar;
+    private TextView tv_content;
+    private Button cancle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +37,7 @@ public class PsamActivity extends AppCompatActivity {
         setContentView(R.layout.activity_psam);
         psam1 = ((Button) findViewById(R.id.psam1));
         psam2 = ((Button) findViewById(R.id.psam2));
+        tv_content = ((TextView) findViewById(R.id.psam_content));
         btn_back = ((ImageView) findViewById(R.id.btn_back));
         btn_back.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -43,6 +46,7 @@ public class PsamActivity extends AppCompatActivity {
             }
         });
         tv_title = ((TextView) findViewById(R.id.main_title));
+        cancle = ((Button) findViewById(R.id.cancle));
         tv_title.setText(R.string.action_pasm);
         prograssBar = ((ProgressBar) findViewById(R.id.prograss));
         sMAC = null;
@@ -52,6 +56,7 @@ public class PsamActivity extends AppCompatActivity {
             public void handleMessage(Message msg) {
                 if (msg.what == 0x6) {
                     prograssBar.setVisibility(View.GONE);
+                    tv_content.setText("pasm内容为：：：：" + msg.obj.toString());
                 }
             }
         };
@@ -82,6 +87,12 @@ public class PsamActivity extends AppCompatActivity {
                 cwsdk.getPsam(1);
             }
         });
+//        cancle.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                cwsdk.cancle(6);
+//            }
+//        });
 
     }
 

@@ -89,8 +89,8 @@ public class KeyPadActivity extends Activity {
                     tv1.setText(msg.obj.toString());
                 } else if (msg.what == 0x11) {
                     prograssBar.setVisibility(View.INVISIBLE);
-                    tv2.setText(msg.obj.toString().split(";")[0]);
-                    tv3.setText(msg.obj.toString().split(";")[1]);
+                    tv2.setText(msg.obj.toString().split(";")[1]);
+                    tv3.setText(msg.obj.toString().split(";")[0]);
                 } else if (msg.what == 0x7) {
                     prograssBar.setVisibility(View.INVISIBLE);
                     Toast.makeText(KeyPadActivity.this, msg.obj.toString(), Toast.LENGTH_SHORT).show();

@@ -1,10 +1,13 @@
 package cwbj.cwsdk2.activity;
 
 import android.app.AlertDialog;
+import android.bluetooth.BluetoothDevice;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
@@ -21,6 +24,9 @@ import java.net.URL;
 import cwbj.cwsdk2.R;
 import cwbj.cwsdk2.util.PrefUtils;
 import cwbj.cwsdk2.util.PubUtils;
+import cwbjsdk.cwsdk.bean.DataBean;
+import cwbjsdk.cwsdk.sdk.CWSDK;
+import cwbjsdk.cwsdk.util.DataBeanCallback;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -42,7 +48,12 @@ public class MainActivity extends AppCompatActivity {
     private Button back;
     private Button btn_ble;
     private Button btn_wifi;
+    private Button connect;
+    private Button disConnect;
 
+    CWSDK cwsdk = CWSDK.getInstance();
+    BluetoothDevice WorkDev = null;
+    Handler handler = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +68,13 @@ public class MainActivity extends AppCompatActivity {
         et3 = (EditText) findViewById(R.id.msg3);
         btn_ble = ((Button) findViewById(R.id.btn_ble));
         btn_wifi = ((Button) findViewById(R.id.btn_wifi));
+        handler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+
+
+            }
+        };
         btn_wifi.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -78,7 +96,39 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         // tv.setText(stringFromJNI());
-
+        connect = ((Button) findViewById(R.id.connect));
+        disConnect = ((Button) findViewById(R.id.disconnect));
+        connect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (null != SelecetedMACStr && !TextUtils.isEmpty(SelecetedDevicesStr)) {
+                    WorkDev = cwsdk.GetBlueToothDevicesByMAC(SelecetedMACStr);
+                    cwsdk.initialize(MainActivity.this, true, handler);
+                    cwsdk.workmode = 1;
+                    cwsdk.IDataBeanCallback = new DataBeanCallback() {
+                        @Override
+                        public Boolean postData(DataBean dataBean) {
+                            // TODO Auto-generated method stub
+//                        GetCmdId(dataBean);
+                            return null;
+                        }
+                    };
+                    cwsdk.connectionDevice(WorkDev);
+                } else {
+                    Toast.makeText(MainActivity.this, "请选择设备", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        disConnect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (null != SelecetedMACStr && !TextUtils.isEmpty(SelecetedDevicesStr)) {
+                    cwsdk.closeBlueTooth();
+                } else {
+                    Toast.makeText(MainActivity.this, "请选择设备", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
 
     }
 

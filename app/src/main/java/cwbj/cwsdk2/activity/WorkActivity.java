@@ -180,6 +180,7 @@ public class WorkActivity extends Activity implements View.OnClickListener {
         btc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                tv.setText("点击读取接触卡或非接触卡卡号......");
                 PubUtils.isContact = true;
 //                prograssBar.setVisibility(View.VISIBLE);
                 if (PubUtils.isWifi) {
@@ -207,6 +208,7 @@ public class WorkActivity extends Activity implements View.OnClickListener {
         btcl.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                tv.setText("点击读取接触卡或非接触卡卡号......");
                 PubUtils.isContact = false;
 //                prograssBar.setVisibility(View.VISIBLE);
                 if (PubUtils.isWifi) {
@@ -245,6 +247,7 @@ public class WorkActivity extends Activity implements View.OnClickListener {
         super.onStop();
         cwsdk.finalize();
         cwsdk.StopDiscovery();
+//        cwsdk.closeBlueTooth();
         if (null != bluetoothGattUtil) {
             bluetoothGattUtil.unregisterCallBack();
             bluetoothGattUtil.disconnect();
